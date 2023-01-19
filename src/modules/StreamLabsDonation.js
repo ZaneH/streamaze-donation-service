@@ -1,12 +1,29 @@
 const io = require("socket.io-client");
 const fetch = require("node-fetch");
 const crypto = require("crypto");
+const { EventEmitter } = require("stream");
 
-class StreamLabs {
-    constructor(streamToken, ws) {
+const streamlabsDonationClients = new Map();
+
+async function getStreamlabsDonationClient(streamToken) {
+    if (streamlabsDonationClients.has(streamToken)) {
+        return streamlabsDonationClients.get(streamToken);
+    }
+
+    const client = new StreamLabsDonation(streamToken);
+    streamlabsDonationClients.set(streamToken, client);
+
+    await client.connect();
+
+    return client;
+}
+
+class StreamLabsDonation extends EventEmitter {
+    constructor(streamToken) {
+        super();
+
         this.streamToken = streamToken;
         this.slobsSocket = null;
-        this.browser = ws;
         this.heartbeat = null;
 
         // Alias for Sam's key
@@ -83,59 +100,52 @@ class StreamLabs {
                             // message is an array
                             for (const m of message) {
                                 const ttsUrl = await this.getTTSUrl(m);
-                                this.browser.send(
-                                    JSON.stringify({
-                                        type,
-                                        data: {
-                                            id: m?.["_id"],
-                                            name: m.name,
-                                            message: m.comment,
-                                            amount: m.displayString,
-                                            tts_url: ttsUrl,
-                                        },
-                                    })
-                                );
+                                this.emit("streamlabsEvent", {
+                                    type,
+                                    data: {
+                                        id: m?.["_id"],
+                                        name: m.name,
+                                        message: m.comment,
+                                        amount: m.displayString,
+                                        tts_url: ttsUrl,
+                                    },
+                                });
                             }
                             break;
                         case "subscription":
                             // message is an array
                             for (const m of message) {
                                 const ttsUrl = await this.getTTSUrl(m);
-                                this.browser.send(
-                                    JSON.stringify({
-                                        type,
-                                        data: {
-                                            id: m?.["_id"],
-                                            name: m.name,
-                                            message: m.message,
-                                            emotes: m?.emotes || [],
-                                            amount: {
-                                                months: m?.months || 0,
-                                            },
-                                            tts_url: ttsUrl,
+                                this.emit("streamlabsEvent", {
+                                    type,
+                                    data: {
+                                        id: m?.["_id"],
+                                        name: m.name,
+                                        message: m.message,
+                                        emotes: m?.emotes || [],
+                                        amount: {
+                                            months: m?.months || 0,
                                         },
-                                    })
-                                );
+                                        tts_url: ttsUrl,
+                                    },
+                                });
                             }
                             break;
                         case "donation":
                             // message is an array
                             for (const m of message) {
                                 const ttsUrl = await this.getTTSUrl(m);
-                                this.browser.send(
-                                    JSON.stringify({
-                                        type,
-                                        data: {
-                                            id: m?.["_id"],
-                                            name: m.name,
-                                            message: m.message,
-                                            emotes: m?.emotes || [],
-                                            amount:
-                                                m?.["formatted_amount"] || 0,
-                                            tts_url: ttsUrl,
-                                        },
-                                    })
-                                );
+                                this.emit("streamlabsEvent", {
+                                    type,
+                                    data: {
+                                        id: m?.["_id"],
+                                        name: m.name,
+                                        message: m.message,
+                                        emotes: m?.emotes || [],
+                                        amount: m?.["formatted_amount"] || 0,
+                                        tts_url: ttsUrl,
+                                    },
+                                });
                             }
                             break;
                         case "streamlabels.underlying":
@@ -167,12 +177,20 @@ class StreamLabs {
             return;
         }
 
+        if (streamlabsDonationClients.has(this.streamToken)) {
+            streamlabsDonationClients.delete(this.streamToken);
+        }
+
         this.slobsSocket.close();
         clearInterval(this.heartbeat);
         this.heartbeat = null;
         this.slobsSocket = null;
+
         console.log("[INFO] Disconnected from StreamLabs");
     }
 }
 
-module.exports = StreamLabs;
+module.exports = {
+    StreamLabsDonation,
+    getStreamlabsDonationClient,
+};

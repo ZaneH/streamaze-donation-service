@@ -1,11 +1,28 @@
 const TikTokLive = require("tiktok-live-connector").WebcastPushConnection;
 const signatureProvider = require("tiktok-live-connector").signatureProvider;
+const { EventEmitter } = require("stream");
 
-class TikTok {
-    constructor(username, ws) {
+const tiktokGiftClients = new Map();
+
+async function getTiktokGiftClient(username) {
+    if (tiktokGiftClients.has(username)) {
+        return tiktokGiftClients.get(username);
+    }
+
+    const client = new TikTokGift(username);
+    tiktokGiftClients.set(username, client);
+
+    await client.connect();
+
+    return client;
+}
+
+class TikTokGift extends EventEmitter {
+    constructor(username) {
+        super();
+
         this.tiktokClient = null;
         this.username = username;
-        this.browser = ws;
         this.diamondThreshold = 100;
     }
 
@@ -67,7 +84,7 @@ class TikTok {
                                 return;
                             }
 
-                            this.browser.send(JSON.stringify(gift));
+                            this.emit("tiktokGift", gift);
                         } catch (e) {
                             console.error(e);
                         }
@@ -87,10 +104,18 @@ class TikTok {
             return;
         }
 
+        if (tiktokGiftClients.has(this.username)) {
+            tiktokGiftClients.delete(this.username);
+        }
+
         this.tiktokClient.disconnect();
         this.tiktokClient = null;
-        console.log("[INFO] Disconnected from TikTok");
+
+        console.log("[INFO] Disconnected from TikTok gift listener");
     }
 }
 
-module.exports = TikTok;
+module.exports = {
+    TikTokGift,
+    getTiktokGiftClient,
+};

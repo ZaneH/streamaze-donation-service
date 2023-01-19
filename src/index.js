@@ -1,6 +1,8 @@
 const WebSocketServer = require("ws").Server;
-const StreamLabs = require("./modules/StreamLabs");
-const TikTok = require("./modules/TikTok");
+const { getStreamlabsDonationClient } = require("./modules/StreamLabsDonation");
+const { getTiktokGiftClient } = require("./modules/TikTokGift");
+const { getTiktokChatClient } = require("./modules/TikTokChat");
+const { getYoutubeChatClient } = require("./modules/YouTubeChat");
 require("dotenv").config();
 
 const wss = new WebSocketServer({ port: 8080 });
@@ -19,8 +21,10 @@ const interval = setInterval(function ping() {
 }, 30000);
 
 wss.on("connection", (ws) => {
-    let slobsClient;
-    let tiktokClient;
+    let tiktokChatClient;
+    let youtubeChatClient;
+    let slobsDonationClient;
+    let tiktokGiftClient;
 
     ws.on("pong", heartbeat);
 
@@ -30,24 +34,69 @@ wss.on("connection", (ws) => {
         ws.isAlive = true;
 
         let payload;
-        let streamToken;
-        let tiktokUsername;
+        let tiktokChatUsername; // for TikTok chat
+        let youtubeChatUrl; // for YouTube chat
+        let streamToken; // for StreamLabs donations
+        let tiktokDonoUsername; // for TikTok gifts
 
         try {
             payload = JSON.parse(message);
 
+            tiktokChatUsername = payload?.tiktokChat;
+            youtubeChatUrl = payload?.youtubeChat;
             streamToken = payload?.streamToken;
-            tiktokUsername = payload?.tiktokUsername;
-
-            slobsClient = new StreamLabs(streamToken, ws);
-            tiktokClient = new TikTok(tiktokUsername, ws);
+            tiktokDonoUsername = payload?.tiktokDonos;
 
             if (streamToken) {
-                await slobsClient.connect();
+                try {
+                    slobsDonationClient = await getStreamlabsDonationClient(
+                        streamToken
+                    );
+                    slobsDonationClient.on("streamlabsEvent", (data) => {
+                        ws.send(JSON.stringify(data));
+                    });
+                } catch (e) {
+                    console.error(e);
+                }
             }
 
-            if (tiktokUsername) {
-                await tiktokClient.connect();
+            if (tiktokDonoUsername) {
+                try {
+                    tiktokGiftClient = await getTiktokGiftClient(
+                        tiktokDonoUsername
+                    );
+                    tiktokGiftClient.on("tiktokGift", (data) => {
+                        ws.send(JSON.stringify(data));
+                    });
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+
+            if (tiktokChatUsername) {
+                try {
+                    tiktokChatClient = await getTiktokChatClient(
+                        tiktokChatUsername
+                    );
+                    tiktokChatClient.on("tiktokChat", (data) => {
+                        ws.send(JSON.stringify(data));
+                    });
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+
+            if (youtubeChatUrl) {
+                try {
+                    youtubeChatClient = await getYoutubeChatClient(
+                        youtubeChatUrl
+                    );
+                    youtubeChatClient.on("youtubeChat", (data) => {
+                        ws.send(JSON.stringify(data));
+                    });
+                } catch (e) {
+                    console.error(e);
+                }
             }
         } catch (e) {
             console.log("[ERROR] Invalid request", e);
@@ -56,12 +105,20 @@ wss.on("connection", (ws) => {
     });
 
     ws.on("close", async () => {
-        if (slobsClient) {
-            await slobsClient.close();
+        if (slobsDonationClient) {
+            await slobsDonationClient.close();
         }
 
-        if (tiktokClient) {
-            await tiktokClient.close();
+        if (tiktokGiftClient) {
+            await tiktokGiftClient.close();
+        }
+
+        if (tiktokChatClient) {
+            await tiktokChatClient.close();
+        }
+
+        if (youtubeChatClient) {
+            await youtubeChatClient.close();
         }
 
         console.log("[INFO] Disconnected from client");
