@@ -52,19 +52,20 @@ class YouTubeChat extends EventEmitter {
                 console.log(author, data);
             }
 
-            const allEmoji = message
-                ?.filter((m) => !!m.emojiText)
-                .map((mi) => ({
-                    url: mi.url,
-                    keys: mi.alt,
-                }));
+            const allEmoji =
+                message
+                    ?.filter((m) => !!m.emojiText)
+                    ?.map((mi) => ({
+                        url: mi.url,
+                        keys: mi.alt,
+                    })) ?? [];
 
             const uniqueEmoji = [...new Set(allEmoji)];
             const memberBadge = author?.badge?.thumbnail?.url;
 
             this.emit("youtubeChat", {
                 sender: author?.name,
-                message: message?.map((m) => m.text ?? m?.alt).join(""),
+                message: message?.map((m) => m.text ?? m?.alt)?.join(""),
                 origin: "youtube",
                 emotes: uniqueEmoji,
                 pfp,
