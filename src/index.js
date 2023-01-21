@@ -1,4 +1,5 @@
 const WebSocketServer = require("ws").Server;
+const crypto = require("crypto");
 const { getStreamlabsDonationClient } = require("./modules/StreamLabsDonation");
 const { getTiktokGiftClient } = require("./modules/TikTokGift");
 const { getTiktokChatClient } = require("./modules/TikTokChat");
@@ -49,6 +50,19 @@ wss.on("connection", (ws) => {
 
             if (streamToken) {
                 try {
+                    // Alias for Sam's key
+                    const samAlias = process.env.SAM_SOCKET_TOKEN_ALIAS;
+                    if (samAlias.length === streamToken.length) {
+                        if (
+                            crypto.timingSafeEqual(
+                                Buffer.from(samAlias),
+                                Buffer.from(streamToken)
+                            )
+                        ) {
+                            streamToken = process.env.SAM_SOCKET_TOKEN;
+                        }
+                    }
+
                     slobsDonationClient = await getStreamlabsDonationClient(
                         streamToken
                     );
@@ -100,6 +114,7 @@ wss.on("connection", (ws) => {
             }
         } catch (e) {
             console.log("[ERROR] Invalid request", e);
+            ws.close(1011, "Invalid request");
             return;
         }
     });

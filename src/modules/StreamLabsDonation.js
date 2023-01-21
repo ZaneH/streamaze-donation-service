@@ -1,6 +1,5 @@
 const io = require("socket.io-client");
 const fetch = require("node-fetch");
-const crypto = require("crypto");
 const { EventEmitter } = require("stream");
 
 const streamlabsDonationClients = new Map();
@@ -25,19 +24,6 @@ class StreamLabsDonation extends EventEmitter {
         this.streamToken = streamToken;
         this.slobsSocket = null;
         this.heartbeat = null;
-
-        // Alias for Sam's key
-        const samAlias = process.env.SAM_SOCKET_TOKEN_ALIAS;
-        if (samAlias.length === streamToken.length) {
-            if (
-                crypto.timingSafeEqual(
-                    Buffer.from(samAlias),
-                    Buffer.from(streamToken)
-                )
-            ) {
-                this.streamToken = process.env.SAM_SOCKET_TOKEN;
-            }
-        }
     }
 
     async getTTSUrl(message, voice = "Ivy") {
