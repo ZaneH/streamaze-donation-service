@@ -1,10 +1,10 @@
-const WebSocketServer = require('ws').Server
 const crypto = require('crypto')
 const { getStreamlabsDonationClient } = require('./modules/StreamLabsDonation')
 const { getTiktokGiftClient } = require('./modules/TikTokGift')
 const { getTiktokChatClient } = require('./modules/TikTokChat')
 const { getYoutubeChatClient } = require('./modules/YouTubeChat')
 const express = require('express')
+const enableWs = require('express-ws')
 const {
   startBroadcast,
   startServer,
@@ -13,16 +13,16 @@ const {
 } = require('./modules/OBS')
 const cors = require('cors')
 const app = express()
-require('dotenv').config()
+const wsInstance = enableWs(app)
 
-const wss = new WebSocketServer({ port: 8080 })
+require('dotenv').config()
 
 function heartbeat() {
   this.isAlive = true
 }
 
 const interval = setInterval(function ping() {
-  wss.clients.forEach(function each(ws) {
+  wsInstance.getWss().clients.forEach(function each(ws) {
     if (ws.isAlive === false) return ws.terminate()
 
     ws.isAlive = false
@@ -30,7 +30,10 @@ const interval = setInterval(function ping() {
   })
 }, 30000)
 
-wss.on('connection', (ws) => {
+app.use(cors())
+app.use(express.json())
+
+app.ws('/ws', (ws, req) => {
   let tiktokChatClient
   let youtubeChatClient
   let slobsDonationClient
@@ -141,12 +144,9 @@ wss.on('connection', (ws) => {
   })
 })
 
-wss.on('close', function close() {
+wsInstance.getWss().on('close', function close() {
   clearInterval(interval)
 })
-
-app.use(cors())
-app.use(express.json())
 
 app.get('/', (req, res) => {
   return res.send('ok')
@@ -201,6 +201,7 @@ app.post('/obs/switch-scene', async (req, res) => {
   }
 })
 
-app.listen(8000, () => {
-  console.log('Service is running on :8000')
+app.listen(8080, () => {
+  console.log('Service is running on :8080')
+  console.log('Websocket is running on :8080/ws')
 })
