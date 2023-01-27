@@ -11,11 +11,19 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "cors": "^2.8.5",
     "dotenv": "^16.0.3",
+    "express": "^4.18.2",
     "node-fetch": "^2.6.8",
     "socket.io-client": "2.3.0",
     "tiktok-live-connector": "^1.0.2",
     "ws": "^8.12.0",
     "youtube-chat": "^2.2.0"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "trailingComma": "all",
+    "semi": false,
+    "tabWidth": 2
   }
 }
