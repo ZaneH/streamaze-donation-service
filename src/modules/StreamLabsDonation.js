@@ -1,6 +1,7 @@
 const io = require('socket.io-client')
 const fetch = require('node-fetch')
 const { EventEmitter } = require('stream')
+const { getPFPFromChannelId } = require('../utils/PFP')
 
 const streamlabsDonationClients = new Map()
 
@@ -94,6 +95,7 @@ class StreamLabsDonation extends EventEmitter {
                     message: m.comment,
                     amount: m.displayString,
                     tts_url: ttsUrl,
+                    pfp: await getPFPFromChannelId(m?.channelId),
                   },
                 })
               }
