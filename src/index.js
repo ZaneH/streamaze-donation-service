@@ -3,6 +3,7 @@ const { getStreamlabsDonationClient } = require('./modules/StreamLabsDonation')
 const { getTiktokGiftClient } = require('./modules/TikTokGift')
 const { getTiktokChatClient } = require('./modules/TikTokChat')
 const { getYoutubeChatClient } = require('./modules/YouTubeChat')
+const { getLanyardClient } = require('./modules/Lanyard')
 const express = require('express')
 const enableWs = require('express-ws')
 const {
@@ -38,6 +39,7 @@ app.ws('/ws', (ws, req) => {
   let youtubeChatClient
   let slobsDonationClient
   let tiktokGiftClient
+  let lanyardClient
 
   ws.on('pong', heartbeat)
 
@@ -52,6 +54,9 @@ app.ws('/ws', (ws, req) => {
     let streamToken // for StreamLabs donations
     let tiktokDonoUsername // for TikTok gifts
 
+    let lanyardDiscordId // for Lanyard
+    let lanyardApiKey // for Lanyard
+
     try {
       payload = JSON.parse(message)
 
@@ -59,6 +64,8 @@ app.ws('/ws', (ws, req) => {
       youtubeChatUrl = payload?.youtubeChat
       streamToken = payload?.streamToken
       tiktokDonoUsername = payload?.tiktokDonos
+      lanyardDiscordId = payload?.lanyardDiscordId
+      lanyardApiKey = payload?.lanyardApiKey
 
       if (streamToken) {
         try {
@@ -116,6 +123,17 @@ app.ws('/ws', (ws, req) => {
           console.error(e)
         }
       }
+
+      if (lanyardDiscordId && lanyardApiKey) {
+        try {
+          lanyardClient = await getLanyardClient(
+            lanyardDiscordId,
+            lanyardApiKey,
+          )
+        } catch (e) {
+          console.error(e)
+        }
+      }
     } catch (e) {
       console.log('[ERROR] Invalid request', e)
       ws.close(1011, 'Invalid request')
@@ -140,6 +158,10 @@ app.ws('/ws', (ws, req) => {
       await youtubeChatClient.close()
     }
 
+    if (lanyardClient) {
+      await lanyardClient.close()
+    }
+
     console.log('[INFO] Disconnected from client')
   })
 })
@@ -148,11 +170,11 @@ wsInstance.getWss().on('close', function close() {
   clearInterval(interval)
 })
 
-app.get('/', (req, res) => {
+app.get('/', (_req, res) => {
   return res.send('ok')
 })
 
-app.post('/obs/start-broadcast', async (req, res) => {
+app.post('/obs/start-broadcast', async (_req, res) => {
   const resp = await startBroadcast()
   if (resp?.error) {
     return res.status(500).send(resp)
@@ -161,7 +183,7 @@ app.post('/obs/start-broadcast', async (req, res) => {
   return res.send(resp)
 })
 
-app.post('/obs/stop-broadcast', async (req, res) => {
+app.post('/obs/stop-broadcast', async (_req, res) => {
   const resp = await stopBroadcast()
   if (resp?.error) {
     return res.status(500).send(resp)
@@ -170,7 +192,7 @@ app.post('/obs/stop-broadcast', async (req, res) => {
   return res.send(resp)
 })
 
-app.post('/obs/start-server', async (req, res) => {
+app.post('/obs/start-server', async (_req, res) => {
   const resp = await startServer()
   if (resp?.error) {
     return res.status(500).send(resp)
@@ -179,7 +201,7 @@ app.post('/obs/start-server', async (req, res) => {
   return res.send(resp)
 })
 
-app.post('/obs/stop-server', async (req, res) => {
+app.post('/obs/stop-server', async (_req, res) => {
   const resp = await stopServer()
   if (resp?.error) {
     return res.status(500).send(resp)
