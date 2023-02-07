@@ -28,9 +28,16 @@ class StreamLabsDonation extends EventEmitter {
   }
 
   async getTTSUrl(message, voice = 'Ivy') {
-    let text = message.comment
+    let text = message?.comment
+
+    // Membership messages don't have a comment
     if (!text) {
-      text = message.message
+      text = message?.message
+    }
+
+    // Prevent empty messages
+    if (!text) {
+      return
     }
 
     const tts = await fetch('https://streamlabs.com/polly/speak', {
@@ -39,7 +46,7 @@ class StreamLabsDonation extends EventEmitter {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        text: `${message.name} said ${text}`,
+        text: `${message?.name} said ${text}`,
         voice,
       }),
     })
@@ -103,7 +110,6 @@ class StreamLabsDonation extends EventEmitter {
             case 'subscription':
               // message is an array
               for (const m of message) {
-                const ttsUrl = await this.getTTSUrl(m)
                 this.emit('streamlabsEvent', {
                   type,
                   data: {
@@ -114,7 +120,6 @@ class StreamLabsDonation extends EventEmitter {
                     amount: {
                       months: m?.months || 0,
                     },
-                    tts_url: ttsUrl,
                   },
                 })
               }
