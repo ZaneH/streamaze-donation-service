@@ -39,6 +39,11 @@ class YouTubeChat extends EventEmitter {
     })
 
     this.chatClient.on('chat', (data) => {
+      // don't send superchats as chat messages
+      if (data?.superchat) {
+        return
+      }
+
       const {
         author,
         message,
@@ -47,6 +52,7 @@ class YouTubeChat extends EventEmitter {
         isVerified,
         isModerator,
       } = data
+
       const pfp = author?.thumbnail?.url
       if (!pfp) {
         console.log(author, data)
