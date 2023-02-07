@@ -71,7 +71,7 @@ class TikTokChat extends EventEmitter {
     })
   }
 
-  async close() {
+  close() {
     if (!this.tiktokClient) {
       return
     }

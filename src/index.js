@@ -34,7 +34,7 @@ const interval = setInterval(function ping() {
 app.use(cors())
 app.use(express.json())
 
-app.ws('/ws', (ws, req) => {
+app.ws('/ws', (ws, _req) => {
   let tiktokChatClient
   let youtubeChatClient
   let slobsDonationClient
@@ -54,7 +54,7 @@ app.ws('/ws', (ws, req) => {
     let streamToken // for StreamLabs donations
     let tiktokDonoUsername // for TikTok gifts
 
-    let lanyardDiscordId // for Lanyard
+    let lanyardDiscordUserId // for Lanyard
     let lanyardApiKey // for Lanyard
 
     try {
@@ -64,7 +64,7 @@ app.ws('/ws', (ws, req) => {
       youtubeChatUrl = payload?.youtubeChat
       streamToken = payload?.streamToken
       tiktokDonoUsername = payload?.tiktokDonos
-      lanyardDiscordId = payload?.lanyardDiscordId
+      lanyardDiscordUserId = payload?.discordUserId
       lanyardApiKey = payload?.lanyardApiKey
 
       if (streamToken) {
@@ -124,12 +124,15 @@ app.ws('/ws', (ws, req) => {
         }
       }
 
-      if (lanyardDiscordId && lanyardApiKey) {
+      if (lanyardDiscordUserId) {
         try {
           lanyardClient = await getLanyardClient(
-            lanyardDiscordId,
+            lanyardDiscordUserId,
             lanyardApiKey,
           )
+          lanyardClient.on('update', (data) => {
+            ws.send(JSON.stringify(data))
+          })
         } catch (e) {
           console.error(e)
         }
@@ -143,23 +146,23 @@ app.ws('/ws', (ws, req) => {
 
   ws.on('close', async () => {
     if (slobsDonationClient) {
-      await slobsDonationClient.close()
+      slobsDonationClient.close()
     }
 
     if (tiktokGiftClient) {
-      await tiktokGiftClient.close()
+      tiktokGiftClient.close()
     }
 
     if (tiktokChatClient) {
-      await tiktokChatClient.close()
+      tiktokChatClient.close()
     }
 
     if (youtubeChatClient) {
-      await youtubeChatClient.close()
+      youtubeChatClient.close()
     }
 
     if (lanyardClient) {
-      await lanyardClient.close()
+      lanyardClient.close()
     }
 
     console.log('[INFO] Disconnected from client')

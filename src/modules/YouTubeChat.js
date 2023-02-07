@@ -95,7 +95,7 @@ class YouTubeChat extends EventEmitter {
     }
   }
 
-  async close() {
+  close() {
     if (youtubeChatClients.has(this.channelUrl)) {
       youtubeChatClients.delete(this.channelUrl)
     }

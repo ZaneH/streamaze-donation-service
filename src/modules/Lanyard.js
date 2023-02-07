@@ -5,13 +5,13 @@ const { getPFPFromChannelId } = require('../utils/PFP')
 
 const lanyardClients = new Map()
 
-async function getLanyardClient(discordId, apiKey) {
-  if (lanyardClients.has(discordId)) {
-    return lanyardClients.get(discordId)
+async function getLanyardClient(discordUserId, apiKey) {
+  if (lanyardClients.has(discordUserId)) {
+    return lanyardClients.get(discordUserId)
   }
 
-  const client = new LanyardAPI(discordId, apiKey)
-  lanyardClients.set(discordId, client)
+  const client = new LanyardAPI(discordUserId, apiKey)
+  lanyardClients.set(discordUserId, client)
 
   await client.connect()
 
@@ -19,10 +19,10 @@ async function getLanyardClient(discordId, apiKey) {
 }
 
 class LanyardAPI extends EventEmitter {
-  constructor(discordId, apiKey) {
+  constructor(discordUserId, apiKey) {
     super()
 
-    this.discordId = discordId
+    this.discordUserId = discordUserId
     this.apiKey = apiKey
     this.socket = null
     this.heartbeat = null
@@ -47,7 +47,7 @@ class LanyardAPI extends EventEmitter {
             JSON.stringify({
               op: 2,
               d: {
-                subscribe_to_id: this.discordId,
+                subscribe_to_id: this.discordUserId,
               },
             }),
           )
@@ -70,7 +70,7 @@ class LanyardAPI extends EventEmitter {
     })
   }
 
-  async close() {
+  close() {
     if (this.socket) {
       this.socket.close()
     }

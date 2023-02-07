@@ -165,7 +165,7 @@ class StreamLabsDonation extends EventEmitter {
     })
   }
 
-  async close() {
+  close() {
     if (!this.slobsSocket) {
       return
     }

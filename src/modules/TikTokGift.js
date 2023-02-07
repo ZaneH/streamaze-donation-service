@@ -98,7 +98,7 @@ class TikTokGift extends EventEmitter {
     })
   }
 
-  async close() {
+  close() {
     if (!this.tiktokClient) {
       return
     }
