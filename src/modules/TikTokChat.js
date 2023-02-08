@@ -42,7 +42,6 @@ class TikTokChat extends EventEmitter {
       )
     }
 
-    signatureProvider.config.extraParams.apiKey = apiKey
     this.tiktokClient = new TikTokLive(this.username)
 
     return new Promise((resolve, reject) => {
