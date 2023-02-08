@@ -89,7 +89,7 @@ class YouTubeChat extends EventEmitter {
 
     const ok = await this.chatClient.start()
     if (!ok) {
-      throw new Error('Could not connect to YouTube chat')
+      throw new Error('Could not connect to YouTube chat', ok)
     } else {
       console.log('[INFO] YouTube chat connected')
     }

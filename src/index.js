@@ -3,7 +3,7 @@ const { getStreamlabsDonationClient } = require('./modules/StreamLabsDonation')
 const { getTiktokGiftClient } = require('./modules/TikTokGift')
 const { getTiktokChatClient } = require('./modules/TikTokChat')
 const { getYoutubeChatClient } = require('./modules/YouTubeChat')
-const { getLanyardClient } = require('./modules/Lanyard')
+const { updateKV } = require('./modules/Lanyard')
 const express = require('express')
 const enableWs = require('express-ws')
 const {
@@ -54,9 +54,6 @@ app.ws('/ws', (ws, _req) => {
     let streamToken // for StreamLabs donations
     let tiktokDonoUsername // for TikTok gifts
 
-    let lanyardDiscordUserId // for Lanyard
-    let lanyardApiKey // for Lanyard
-
     try {
       payload = JSON.parse(message)
 
@@ -64,8 +61,6 @@ app.ws('/ws', (ws, _req) => {
       youtubeChatUrl = payload?.youtubeChat
       streamToken = payload?.streamToken
       tiktokDonoUsername = payload?.tiktokDonos
-      lanyardDiscordUserId = payload?.discordUserId
-      lanyardApiKey = payload?.lanyardApiKey
 
       if (streamToken) {
         try {
@@ -123,20 +118,6 @@ app.ws('/ws', (ws, _req) => {
           console.error(e)
         }
       }
-
-      if (lanyardDiscordUserId) {
-        try {
-          lanyardClient = await getLanyardClient(
-            lanyardDiscordUserId,
-            lanyardApiKey,
-          )
-          lanyardClient.on('update', (data) => {
-            ws.send(JSON.stringify(data))
-          })
-        } catch (e) {
-          console.error(e)
-        }
-      }
     } catch (e) {
       console.log('[ERROR] Invalid request', e)
       ws.close(1011, 'Invalid request')
@@ -144,7 +125,7 @@ app.ws('/ws', (ws, _req) => {
     }
   })
 
-  ws.on('close', async () => {
+  ws.on('close', () => {
     if (slobsDonationClient) {
       slobsDonationClient.close()
     }
@@ -159,10 +140,6 @@ app.ws('/ws', (ws, _req) => {
 
     if (youtubeChatClient) {
       youtubeChatClient.close()
-    }
-
-    if (lanyardClient) {
-      lanyardClient.close()
     }
 
     console.log('[INFO] Disconnected from client')
@@ -223,6 +200,32 @@ app.post('/obs/switch-scene', async (req, res) => {
     return res.send(resp)
   } else {
     return res.status(400).send('Missing scene name')
+  }
+})
+
+/**
+ * Update a key/value pair in the KV store for Lanyard
+ * method: POST
+ * body: {
+ *  discordUserId: string
+ *  key: string
+ *  value: string
+ *  apiKey: string
+ * }
+ */
+app.post('/kv/set', async (req, res) => {
+  const { discordUserId, key, value, apiKey } = req.body
+  if (discordUserId && key && value && apiKey) {
+    try {
+      const resp = await updateKV(discordUserId, key, value, apiKey)
+
+      return res.send(resp)
+    } catch (e) {
+      console.error(e)
+      return res.status(500).send(e)
+    }
+  } else {
+    return res.status(400).send('Missing discordUserId, key, value, or apiKey')
   }
 })
 
