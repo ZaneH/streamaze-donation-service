@@ -13,6 +13,7 @@ const {
   stopBroadcast,
 } = require('./modules/OBS')
 const cors = require('cors')
+const { stopRPi } = require('./modules/RPi')
 const app = express()
 const wsInstance = enableWs(app)
 
@@ -201,6 +202,15 @@ app.post('/obs/switch-scene', async (req, res) => {
   } else {
     return res.status(400).send('Missing scene name')
   }
+})
+
+app.post('/pi/stop', async (_req, res) => {
+  const resp = await stopRPi()
+  if (resp?.error) {
+    return res.status(500).send(resp)
+  }
+
+  return res.send(resp)
 })
 
 /**
