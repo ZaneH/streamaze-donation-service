@@ -42,14 +42,29 @@ stopBroadcast = async () => {
   }
 }
 
-startServer = async () => {
-  const resp = await fetch(createEndpointUrl('/streamers/sam/server/start'), {
-    method: 'POST',
-  })
+startServer = async ({ isYouTube = false, isTikTok = false }) => {
+  // if isYouTube or isTikTok is not set, throw an error
+  if (!isYouTube && !isTikTok) {
+    throw new Error('You must specify a platform to start the server for.')
+  }
+
+  const qs = new URLSearchParams()
+  if (isYouTube) {
+    qs.append('id', 'default')
+  } else if (isTikTok) {
+    qs.append('id', 'tiktok')
+  }
+
+  const resp = await fetch(
+    createEndpointUrl(`/streamers/sam/server/start?${qs.toString()}`),
+    {
+      method: 'POST',
+    },
+  )
 
   if (handleResponse(resp)) {
     return {
-      message: 'Server started.',
+      message: `${isYouTube ? 'YouTube' : 'TikTok'} server started.`,
     }
   } else {
     console.error(resp)

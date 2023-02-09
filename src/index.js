@@ -173,8 +173,23 @@ app.post('/obs/stop-broadcast', async (_req, res) => {
   return res.send(resp)
 })
 
-app.post('/obs/start-server', async (_req, res) => {
-  const resp = await startServer()
+app.post('/obs/start-server/youtube', async (_req, res) => {
+  const resp = await startServer({
+    isYouTube: true,
+  })
+
+  if (resp?.error) {
+    return res.status(500).send(resp)
+  }
+
+  return res.send(resp)
+})
+
+app.post('/obs/start-server/tiktok', async (_req, res) => {
+  const resp = await startServer({
+    isTikTok: true,
+  })
+
   if (resp?.error) {
     return res.status(500).send(resp)
   }
