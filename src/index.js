@@ -14,6 +14,7 @@ const {
 } = require('./modules/OBS')
 const cors = require('cors')
 const { stopRPi } = require('./modules/RPi')
+const { oneUSDToBaht } = require('./utils/ExchangeRate')
 const app = express()
 const wsInstance = enableWs(app)
 
@@ -222,6 +223,15 @@ app.post('/obs/switch-scene', async (req, res) => {
 app.post('/pi/stop', async (_req, res) => {
   const resp = await stopRPi()
   if (resp?.error) {
+    return res.status(500).send(resp)
+  }
+
+  return res.send(resp)
+})
+
+app.get('/exchange/baht', async (_req, res) => {
+  const resp = await oneUSDToBaht()
+  if (isNaN(resp)) {
     return res.status(500).send(resp)
   }
 
