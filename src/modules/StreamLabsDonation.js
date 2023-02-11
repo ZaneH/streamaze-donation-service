@@ -153,6 +153,7 @@ class StreamLabsDonation extends EventEmitter {
                   data: {
                     id: m?.['_id'],
                     name: m.name,
+                    // TODO: gift_* should go into amount: {}
                     gift_count: m?.giftMembershipsCount,
                     gift_level: m?.giftMembershipsLevelName,
                     pfp: await getPFPFromChannelId(m?.channelUrl),
