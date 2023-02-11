@@ -1,6 +1,10 @@
 const fetch = require('node-fetch')
 
-const getPFPFromChannelId = async (channelId) => {
+const getPFPFromChannelId = async (channelId = '') => {
+  if (channelId.indexOf('/channel/') > -1) {
+    channelId = channelId.split('/channel/')[1]
+  }
+
   try {
     const resp = await fetch(
       `https://www.googleapis.com/youtube/v3/channels?part=snippet&id=${channelId}&fields=items%2Fsnippet%2Fthumbnails&key=${process.env.YOUTUBE_API_KEY}`,

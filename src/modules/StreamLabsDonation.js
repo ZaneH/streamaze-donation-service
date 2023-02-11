@@ -27,7 +27,7 @@ class StreamLabsDonation extends EventEmitter {
     this.heartbeat = null
   }
 
-  async getTTSUrl(message, voice = 'Ivy') {
+  async getTTSUrl(message, voice = 'Ivy', exactMessage = false) {
     let text = message?.comment
 
     // Membership messages don't have a comment
@@ -46,7 +46,7 @@ class StreamLabsDonation extends EventEmitter {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        text: `${message?.name} said ${text}`,
+        text: exactMessage ? message : `${message?.name} said ${text}`,
         voice,
       }),
     })
@@ -137,6 +137,25 @@ class StreamLabsDonation extends EventEmitter {
                     emotes: m?.emotes || [],
                     amount: m?.['formatted_amount'] || 0,
                     tts_url: ttsUrl,
+                  },
+                })
+              }
+              break
+            case 'membershipGift':
+              // message is an array
+              for (const m of message) {
+                if (!m?.giftMembershipsCount) {
+                  continue
+                }
+
+                this.emit('streamlabsEvent', {
+                  type,
+                  data: {
+                    id: m?.['_id'],
+                    name: m.name,
+                    gift_count: m?.giftMembershipsCount,
+                    gift_level: m?.giftMembershipsLevelName,
+                    pfp: await getPFPFromChannelId(m?.channelUrl),
                   },
                 })
               }
