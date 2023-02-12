@@ -161,6 +161,52 @@ class StreamLabsDonation extends EventEmitter {
                 })
               }
               break
+            case 'mediaShareEvent':
+              // mediaEvent examples: acceptAll, newMedia, play, seekMedia
+              const { event: mediaEvent } = message || {}
+              // media contains the media info
+              const { media } = message || {}
+
+              if (mediaEvent === 'play') {
+                // I assume modMoveToNext is a 'skip' action for media shares
+                const { modMoveToNext } = message || {}
+
+                if (modMoveToNext === true) {
+                  this.emit('streamlabsEvent', {
+                    type,
+                    data: {
+                      action: 'modMoveToNext',
+                    },
+                  })
+                } else {
+                  // emit info to play media
+                  let youtubeUrl
+                  let thumbnailUrl
+
+                  if (media?.media_type === 'youtube') {
+                    youtubeUrl = `https://www.youtube.com/watch?v=${
+                      media?.media
+                    }&t=${media?.start_time ?? 0}`
+
+                    thumbnailUrl = `https://img.youtube.com/vi/${media?.media}/default.jpg`
+                  }
+
+                  this.emit('streamlabsEvent', {
+                    type,
+                    data: {
+                      action: media?.action,
+                      action_by: media?.action_by,
+                      donation_id: media?.donation_id,
+                      media_title: media?.media_title,
+                      media_type: media?.media_type,
+                      media_link: youtubeUrl,
+                      media_thumbnail: thumbnailUrl,
+                      duration: media?.duration ?? 0,
+                    },
+                  })
+                }
+              }
+              break
             case 'streamlabels.underlying':
               break
             case 'streamlabels':
@@ -170,7 +216,10 @@ class StreamLabsDonation extends EventEmitter {
             case 'ping':
               break
             default:
-              console.log('[INFO] Unknown event', event)
+              console.log(
+                '[INFO] Unknown event',
+                JSON.stringify(event, null, 2),
+              )
           }
         } catch (e) {
           console.error(e)
