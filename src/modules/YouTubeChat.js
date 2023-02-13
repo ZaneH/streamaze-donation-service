@@ -38,6 +38,10 @@ class YouTubeChat extends EventEmitter {
       handle: this.channelUrl,
     })
 
+    this.chatClient.on('start', () => {
+      this.emit('connected')
+    })
+
     this.chatClient.on('chat', (data) => {
       // don't send superchats as chat messages
       if (data?.superchat) {

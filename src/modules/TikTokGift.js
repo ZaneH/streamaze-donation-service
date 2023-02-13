@@ -65,6 +65,11 @@ class TikTokGift extends EventEmitter {
         console.log('[INFO] Getting available gifts...')
 
         console.log('[INFO] Listening for gifts...')
+
+        this.tiktokClient.on('connected', () => {
+          this.emit('connected')
+        })
+
         this.tiktokClient.on('gift', (data) => {
           try {
             if (data.giftType === 1 && !data.repeatEnd) {

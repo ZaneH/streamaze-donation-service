@@ -90,11 +90,22 @@ app.ws('/ws', (ws, _req) => {
       if (tiktokDonoUsername) {
         try {
           tiktokGiftClient = await getTiktokGiftClient(tiktokDonoUsername)
+          didConnect = false
+
+          tiktokGiftClient.on('connected', () => {
+            didConnect = true
+          })
+
           tiktokGiftClient.on('tiktokGift', (data) => {
             ws.send(JSON.stringify(data))
           })
 
           tiktokGiftClient.on('end', () => {
+            if (!didConnect) {
+              // never connected, so don't terminate the connection
+              return
+            }
+
             ws.terminate()
           })
         } catch (e) {
@@ -105,11 +116,22 @@ app.ws('/ws', (ws, _req) => {
       if (tiktokChatUsername) {
         try {
           tiktokChatClient = await getTiktokChatClient(tiktokChatUsername)
+          didConnect = false
+
+          tiktokChatClient.on('connected', () => {
+            didConnect = true
+          })
+
           tiktokChatClient.on('tiktokChat', (data) => {
             ws.send(JSON.stringify(data))
           })
 
           tiktokChatClient.on('end', () => {
+            if (!didConnect) {
+              // never connected, so don't terminate the connection
+              return
+            }
+
             ws.terminate()
           })
         } catch (e) {
@@ -120,11 +142,22 @@ app.ws('/ws', (ws, _req) => {
       if (youtubeChatUrl) {
         try {
           youtubeChatClient = await getYoutubeChatClient(youtubeChatUrl)
+          let didConnect = false
+
+          youtubeChatClient.on('connected', () => {
+            didConnect = true
+          })
+
           youtubeChatClient.on('youtubeChat', (data) => {
             ws.send(JSON.stringify(data))
           })
 
           youtubeChatClient.on('end', () => {
+            if (!didConnect) {
+              // never connected, so don't terminate the connection
+              return
+            }
+
             ws.terminate()
           })
         } catch (e) {

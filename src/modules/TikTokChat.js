@@ -59,6 +59,10 @@ class TikTokChat extends EventEmitter {
           })
         })
 
+        this.tiktokClient.on('connected', () => {
+          this.emit('connected')
+        })
+
         this.tiktokClient.on('error', (err) => {
           console.log('[ERROR] Tiktok connection error', err)
           this.emit('end')
