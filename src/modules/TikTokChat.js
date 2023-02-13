@@ -62,19 +62,15 @@ class TikTokChat extends EventEmitter {
         this.tiktokClient.on('error', (err) => {
           console.log('[ERROR] Tiktok connection error', err)
           this.emit('end')
-          this.close()
         })
 
         this.tiktokClient.on('disconnected', () => {
-          console.log('[INFO] Tiktok chat disconnected')
           this.emit('end')
-          this.close()
         })
       })
       .catch((err) => {
         console.log('[ERROR] Tiktok connection error', err)
         this.emit('end')
-        this.close()
       })
   }
 

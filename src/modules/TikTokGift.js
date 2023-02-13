@@ -90,19 +90,15 @@ class TikTokGift extends EventEmitter {
         this.tiktokClient.on('error', (e) => {
           console.error('[ERROR] TikTok gift listener error', e)
           this.emit('end')
-          this.close()
         })
 
         this.tiktokClient.on('disconnected', () => {
-          console.log('[INFO] TikTok gift listener disconnected')
           this.emit('end')
-          this.close()
         })
       })
       .catch((e) => {
         console.error('[ERROR] Try again later', e)
         this.emit('end')
-        this.close()
       })
   }
 

@@ -86,13 +86,10 @@ class YouTubeChat extends EventEmitter {
     this.chatClient.on('error', (err) => {
       console.log(err)
       this.emit('end')
-      this.close()
     })
 
-    this.chatClient.on('end', (reason) => {
-      console.log('[INFO] YouTube chat disconnected', reason)
+    this.chatClient.on('end', (_reason) => {
       this.emit('end')
-      this.close()
     })
 
     const ok = await this.chatClient.start()
