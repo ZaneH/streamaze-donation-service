@@ -1,6 +1,5 @@
 const { EventEmitter } = require('stream')
 const TikTokLive = require('tiktok-live-connector').WebcastPushConnection
-const { signatureProvider } = require('tiktok-live-connector')
 
 const tiktokChatClients = new Map()
 
@@ -44,30 +43,39 @@ class TikTokChat extends EventEmitter {
 
     this.tiktokClient = new TikTokLive(this.username)
 
-    return new Promise((resolve, reject) => {
-      this.tiktokClient
-        .connect()
-        .then(() => {
-          console.log('[INFO] Tiktok chat connected')
+    this.tiktokClient
+      .connect()
+      .then(() => {
+        console.log('[INFO] Tiktok chat connected')
 
-          this.tiktokClient.on('chat', (data) => {
-            let pfpUrl = data?.userDetails?.profilePictureUrls?.[0]
+        this.tiktokClient.on('chat', (data) => {
+          let pfpUrl = data?.userDetails?.profilePictureUrls?.[0]
 
-            this.emit('tiktokChat', {
-              sender: data?.nickname,
-              message: data?.comment,
-              origin: 'tiktok',
-              pfp: pfpUrl,
-            })
+          this.emit('tiktokChat', {
+            sender: data?.nickname,
+            message: data?.comment,
+            origin: 'tiktok',
+            pfp: pfpUrl,
           })
+        })
 
-          resolve()
-        })
-        .catch((err) => {
+        this.tiktokClient.on('error', (err) => {
           console.log('[ERROR] Tiktok connection error', err)
-          reject(err)
+          this.emit('end')
+          this.close()
         })
-    })
+
+        this.tiktokClient.on('disconnected', () => {
+          console.log('[INFO] Tiktok chat disconnected')
+          this.emit('end')
+          this.close()
+        })
+      })
+      .catch((err) => {
+        console.log('[ERROR] Tiktok connection error', err)
+        this.emit('end')
+        this.close()
+      })
   }
 
   close() {

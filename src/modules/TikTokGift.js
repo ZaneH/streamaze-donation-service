@@ -1,5 +1,4 @@
 const TikTokLive = require('tiktok-live-connector').WebcastPushConnection
-const signatureProvider = require('tiktok-live-connector').signatureProvider
 const { EventEmitter } = require('stream')
 
 const tiktokGiftClients = new Map()
@@ -56,46 +55,55 @@ class TikTokGift extends EventEmitter {
       )
     }
 
-    signatureProvider.config.extraParams.apiKey = apiKey
     this.tiktokClient = new TikTokLive(this.username)
 
-    return new Promise((resolve, reject) => {
-      this.tiktokClient
-        .connect()
-        .then(() => {
-          console.log('[INFO] Tiktok connected')
+    this.tiktokClient
+      .connect()
+      .then(() => {
+        console.log('[INFO] Tiktok connected')
 
-          console.log('[INFO] Getting available gifts...')
+        console.log('[INFO] Getting available gifts...')
 
-          console.log('[INFO] Listening for gifts...')
-          this.tiktokClient.on('gift', (data) => {
-            try {
-              if (data.giftType === 1 && !data.repeatEnd) {
-                // sending a streak, we can improve this later
-                return
-              }
-
-              const gift = this.parseGift(data)
-              if (
-                gift.data.gift_cost * gift.data.gift_repeat_count <
-                this.diamondThreshold
-              ) {
-                return
-              }
-
-              this.emit('tiktokGift', gift)
-            } catch (e) {
-              console.error(e)
+        console.log('[INFO] Listening for gifts...')
+        this.tiktokClient.on('gift', (data) => {
+          try {
+            if (data.giftType === 1 && !data.repeatEnd) {
+              // sending a streak, we can improve this later
+              return
             }
-          })
 
-          resolve()
+            const gift = this.parseGift(data)
+            if (
+              gift.data.gift_cost * gift.data.gift_repeat_count <
+              this.diamondThreshold
+            ) {
+              return
+            }
+
+            this.emit('tiktokGift', gift)
+          } catch (e) {
+            console.error(e)
+            this.close()
+          }
         })
-        .catch((e) => {
-          console.error('[ERROR] Try again later')
-          reject(e)
+
+        this.tiktokClient.on('error', (e) => {
+          console.error('[ERROR] TikTok gift listener error', e)
+          this.emit('end')
+          this.close()
         })
-    })
+
+        this.tiktokClient.on('disconnected', () => {
+          console.log('[INFO] TikTok gift listener disconnected')
+          this.emit('end')
+          this.close()
+        })
+      })
+      .catch((e) => {
+        console.error('[ERROR] Try again later', e)
+        this.emit('end')
+        this.close()
+      })
   }
 
   close() {

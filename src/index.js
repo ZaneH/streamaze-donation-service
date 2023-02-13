@@ -41,7 +41,6 @@ app.ws('/ws', (ws, _req) => {
   let youtubeChatClient
   let slobsDonationClient
   let tiktokGiftClient
-  let lanyardClient
 
   ws.on('pong', heartbeat)
 
@@ -94,6 +93,10 @@ app.ws('/ws', (ws, _req) => {
           tiktokGiftClient.on('tiktokGift', (data) => {
             ws.send(JSON.stringify(data))
           })
+
+          tiktokGiftClient.on('end', () => {
+            ws.terminate()
+          })
         } catch (e) {
           console.error(e)
         }
@@ -105,6 +108,10 @@ app.ws('/ws', (ws, _req) => {
           tiktokChatClient.on('tiktokChat', (data) => {
             ws.send(JSON.stringify(data))
           })
+
+          tiktokChatClient.on('end', () => {
+            ws.terminate()
+          })
         } catch (e) {
           console.error(e)
         }
@@ -115,6 +122,10 @@ app.ws('/ws', (ws, _req) => {
           youtubeChatClient = await getYoutubeChatClient(youtubeChatUrl)
           youtubeChatClient.on('youtubeChat', (data) => {
             ws.send(JSON.stringify(data))
+          })
+
+          youtubeChatClient.on('end', () => {
+            ws.terminate()
           })
         } catch (e) {
           console.error(e)
