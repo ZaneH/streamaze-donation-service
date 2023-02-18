@@ -126,6 +126,8 @@ class StreamLabsDonation extends EventEmitter {
                   },
                 })
               }
+              // TODO: Remove this when I figure out how to calculate the worth of a membership
+              console.log('Membership data:', message)
               break
             case 'donation':
               // message is an array
