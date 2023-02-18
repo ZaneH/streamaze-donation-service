@@ -100,7 +100,9 @@ class StreamLabsDonation extends EventEmitter {
                     id: m?.['_id'],
                     name: m.name,
                     message: m.comment,
-                    amount: m.displayString,
+                    displayString: m?.displayString,
+                    amount: m?.['amount'] / 1000000,
+                    currency: m?.['currency'] || 'usd',
                     tts_url: ttsUrl,
                     pfp: await getPFPFromChannelId(m?.channelId),
                   },
@@ -117,6 +119,7 @@ class StreamLabsDonation extends EventEmitter {
                     name: m.name,
                     message: m.message,
                     emotes: m?.emotes || [],
+                    // TODO: Take this out of amount: {}
                     amount: {
                       months: m?.months || 0,
                     },
@@ -135,7 +138,9 @@ class StreamLabsDonation extends EventEmitter {
                     name: m.name,
                     message: m.message,
                     emotes: m?.emotes || [],
-                    amount: m?.['formatted_amount'] || 0,
+                    displayString: m?.['formatted_amount'],
+                    amount: m?.['amount'] || 0,
+                    currency: m?.['currency'] || 'usd',
                     tts_url: ttsUrl,
                   },
                 })
