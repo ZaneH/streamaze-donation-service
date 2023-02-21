@@ -58,7 +58,8 @@ class KickLiveChat extends EventEmitter {
 
   _setup() {
     this.chatSocket.on('open', () => {
-      console.log('Connected to Pusher')
+      console.log('[INFO] Kick chat connected')
+
       this._connect_chat({
         chatroomId: this.chatroomId,
         channelId: this.channelId,
@@ -100,7 +101,6 @@ class KickLiveChat extends EventEmitter {
     })
 
     this.chatSocket.on('close', () => {
-      console.log('Connection closed')
       this.emit('end')
     })
   }
