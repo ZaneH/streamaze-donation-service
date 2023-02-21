@@ -3,6 +3,7 @@ const { getStreamlabsDonationClient } = require('./modules/StreamLabsDonation')
 const { getTiktokGiftClient } = require('./modules/TikTokGift')
 const { getTiktokChatClient } = require('./modules/TikTokChat')
 const { getYoutubeChatClient } = require('./modules/YouTubeChat')
+const { getKickChatClient } = require('./modules/KickChat')
 const { updateKV } = require('./modules/Lanyard')
 const express = require('express')
 const enableWs = require('express-ws')
@@ -41,6 +42,7 @@ app.ws('/ws', (ws, _req) => {
   let youtubeChatClient
   let slobsDonationClient
   let tiktokGiftClient
+  let kickChatClient
 
   ws.on('pong', heartbeat)
 
@@ -54,6 +56,8 @@ app.ws('/ws', (ws, _req) => {
     let youtubeChatUrl // for YouTube chat
     let streamToken // for StreamLabs donations
     let tiktokDonoUsername // for TikTok gifts
+    let kickChatroomId // for Kick chat
+    let kickChannelId // for Kick chat
 
     try {
       payload = JSON.parse(message)
@@ -62,6 +66,8 @@ app.ws('/ws', (ws, _req) => {
       youtubeChatUrl = payload?.youtubeChat
       streamToken = payload?.streamToken
       tiktokDonoUsername = payload?.tiktokDonos
+      kickChatroomId = payload?.kickChatroomId
+      kickChannelId = payload?.kickChannelId
 
       if (streamToken) {
         try {
@@ -164,6 +170,35 @@ app.ws('/ws', (ws, _req) => {
           console.error(e)
         }
       }
+
+      if (kickChatroomId && kickChannelId) {
+        try {
+          kickChatClient = await getKickChatClient(
+            kickChatroomId,
+            kickChannelId,
+          )
+          let didConnect = false
+
+          kickChatClient.on('connected', () => {
+            didConnect = true
+          })
+
+          kickChatClient.on('kickChat', (data) => {
+            ws.send(JSON.stringify(data))
+          })
+
+          kickChatClient.on('end', () => {
+            if (!didConnect) {
+              // never connected, so don't terminate the connection
+              return
+            }
+
+            ws.terminate()
+          })
+        } catch (e) {
+          console.error(e)
+        }
+      }
     } catch (e) {
       console.log('[ERROR] Invalid request', e)
       ws.close(1011, 'Invalid request')
@@ -186,6 +221,10 @@ app.ws('/ws', (ws, _req) => {
 
     if (youtubeChatClient) {
       youtubeChatClient.close()
+    }
+
+    if (kickChatClient) {
+      kickChatClient.close()
     }
 
     console.log('[INFO] Disconnected from client')
