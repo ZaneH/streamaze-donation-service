@@ -142,7 +142,10 @@ class KickLiveChat extends EventEmitter {
   }
 
   disconnect() {
-    this.chatSocket.close()
+    if (this.chatSocket.readyState === WebSocket.OPEN) {
+      this.chatSocket.close()
+    }
+
     this.chatSocket = null
   }
 }
