@@ -175,7 +175,9 @@ class StreamLabsDonation extends EventEmitter {
               const { media } = message || {}
 
               if (mediaEvent === 'play') {
-                // I assume modMoveToNext is a 'skip' action for media shares
+                // modMoveToNext is a 'skip' action for media shares
+                // it is triggered when the duration ends, or
+                // when a mod clicks the skip button
                 const { modMoveToNext } = message || {}
 
                 if (modMoveToNext === true) {
@@ -203,12 +205,12 @@ class StreamLabsDonation extends EventEmitter {
                     data: {
                       action: media?.action,
                       action_by: media?.action_by,
-                      donation_id: media?.donation_id,
+                      donation_id: media?.donation_id ?? media?.id,
                       media_title: media?.media_title,
                       media_type: media?.media_type,
                       media_link: youtubeUrl,
                       media_thumbnail: thumbnailUrl,
-                      duration: media?.duration ?? 0,
+                      duration: media?.duration,
                     },
                   })
                 }
