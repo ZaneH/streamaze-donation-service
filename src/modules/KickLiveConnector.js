@@ -78,6 +78,21 @@ class KickLiveChat extends EventEmitter {
           const { user } = jsonData
 
           const { message: messageText } = message
+          // parse emojis they look like [emote:id_num:name]
+          const emojiRegex = /\[emote:(\d+):([^\]]+)\]/g
+          // find all emojis in the messageText and create {url, keys} objects
+          const allEmoji = [...messageText.matchAll(emojiRegex)].map(
+            (match) => {
+              const [, id, name] = match
+              return {
+                url: `https://files.kick.com/emotes/${id}/fullsize`,
+                keys: `[emote:${id}:${name}]`,
+              }
+            },
+          )
+
+          const uniqueEmoji = [...new Set(allEmoji)]
+
           const { username, verified, is_subscribed, profile_thumb, role } =
             user
           const isMod = role === 'Channel Host'
@@ -92,6 +107,7 @@ class KickLiveChat extends EventEmitter {
             is_owner: isOwner,
             is_verified: verified,
             is_member: is_subscribed,
+            emotes: uniqueEmoji,
           })
         }
       } catch (e) {
