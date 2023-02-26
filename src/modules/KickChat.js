@@ -51,6 +51,14 @@ class KickChat extends EventEmitter {
       this.emit('kickChat', data)
     })
 
+    this.kickClient.on('kickSub', (data) => {
+      this.emit('kickSub', data)
+    })
+
+    this.kickClient.on('kickGiftedSub', (data) => {
+      this.emit('kickGiftedSub', data)
+    })
+
     this.kickClient.on('end', () => {
       this.emit('end')
     })

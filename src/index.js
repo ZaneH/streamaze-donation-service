@@ -187,6 +187,14 @@ app.ws('/ws', (ws, _req) => {
             ws.send(JSON.stringify(data))
           })
 
+          kickChatClient.on('kickSub', (data) => {
+            ws.send(JSON.stringify(data))
+          })
+
+          kickChatClient.on('kickGiftedSub', (data) => {
+            ws.send(JSON.stringify(data))
+          })
+
           kickChatClient.on('end', () => {
             if (!didConnect) {
               // never connected, so don't terminate the connection
