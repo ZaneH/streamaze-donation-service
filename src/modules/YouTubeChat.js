@@ -2,6 +2,7 @@ const { EventEmitter } = require('stream')
 const { LiveChat } = require('youtube-chat')
 
 const youtubeChatClients = new Map()
+const last20MessageIds = []
 
 async function getYoutubeChatClient(channelUrl) {
   if (youtubeChatClients.has(channelUrl)) {
@@ -22,6 +23,7 @@ class YouTubeChat extends EventEmitter {
 
     this.channelUrl = channelUrl
     this.chatClient = null
+    this.connectedClients = 0
   }
 
   async connect() {
@@ -46,6 +48,16 @@ class YouTubeChat extends EventEmitter {
       // don't send superchats as chat messages
       if (data?.superchat) {
         return
+      }
+
+      // don't send messages that are already in the last 50 messages
+      if (last20MessageIds.includes(data?.id)) {
+        return
+      } else {
+        last20MessageIds.push(data?.id)
+        if (last20MessageIds.length > 20) {
+          last20MessageIds.shift()
+        }
       }
 
       const {
@@ -105,6 +117,13 @@ class YouTubeChat extends EventEmitter {
   }
 
   close() {
+    if (this.connectedClients > 1) {
+      this.connectedClients--
+      return
+    }
+
+    console.log('closing')
+
     if (youtubeChatClients.has(this.channelUrl)) {
       youtubeChatClients.delete(this.channelUrl)
     }

@@ -148,6 +148,8 @@ app.ws('/ws', (ws, _req) => {
       if (youtubeChatUrl) {
         try {
           youtubeChatClient = await getYoutubeChatClient(youtubeChatUrl)
+          youtubeChatClient.connectedClients++
+
           let didConnect = false
 
           youtubeChatClient.on('connected', () => {
