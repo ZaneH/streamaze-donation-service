@@ -119,10 +119,8 @@ class YouTubeChat extends EventEmitter {
   close() {
     if (this.connectedClients > 1) {
       this.connectedClients--
-      return
+      return true
     }
-
-    console.log('closing')
 
     if (youtubeChatClients.has(this.channelUrl)) {
       youtubeChatClients.delete(this.channelUrl)
@@ -134,6 +132,7 @@ class YouTubeChat extends EventEmitter {
     }
 
     console.log('[INFO] YouTube chat disconnected')
+    return false
   }
 }
 

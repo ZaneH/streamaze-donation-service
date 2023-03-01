@@ -25,6 +25,7 @@ class StreamLabsDonation extends EventEmitter {
     this.streamToken = streamToken
     this.slobsSocket = null
     this.heartbeat = null
+    this.connectedClients = 0
   }
 
   async getTTSUrl(message, voice = 'Ivy', exactMessage = false) {
@@ -244,8 +245,13 @@ class StreamLabsDonation extends EventEmitter {
   }
 
   close() {
+    if (this.connectedClients > 1) {
+      this.connectedClients--
+      return true
+    }
+
     if (!this.slobsSocket) {
-      return
+      return true
     }
 
     if (streamlabsDonationClients.has(this.streamToken)) {
@@ -258,6 +264,7 @@ class StreamLabsDonation extends EventEmitter {
     this.slobsSocket = null
 
     console.log('[INFO] Disconnected from StreamLabs')
+    return false
   }
 }
 

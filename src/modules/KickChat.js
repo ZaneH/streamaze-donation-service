@@ -26,6 +26,7 @@ class KickChat extends EventEmitter {
     this.chatroomId = chatroomId
     this.channelId = channelId
     this.kickClient = null
+    this.connectedClients = 0
   }
 
   async connect() {
@@ -65,8 +66,13 @@ class KickChat extends EventEmitter {
   }
 
   close() {
+    if (this.connectedClients > 1) {
+      this.connectedClients--
+      return true
+    }
+
     if (!this.kickClient) {
-      return
+      return true
     }
 
     if (kickChatClients.has(this.chatroomId)) {
@@ -77,6 +83,7 @@ class KickChat extends EventEmitter {
     this.kickClient = null
 
     console.log('[INFO] Kick chat disconnected')
+    return false
   }
 }
 

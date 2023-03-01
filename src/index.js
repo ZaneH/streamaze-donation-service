@@ -85,6 +85,7 @@ app.ws('/ws', (ws, _req) => {
           }
 
           slobsDonationClient = await getStreamlabsDonationClient(streamToken)
+          slobsDonationClient.connectedClients++
           slobsDonationClient.on('streamlabsEvent', (data) => {
             ws.send(JSON.stringify(data))
           })
@@ -96,6 +97,7 @@ app.ws('/ws', (ws, _req) => {
       if (tiktokDonoUsername) {
         try {
           tiktokGiftClient = await getTiktokGiftClient(tiktokDonoUsername)
+          tiktokGiftClient.connectedClients++
           didConnect = false
 
           tiktokGiftClient.on('connected', () => {
@@ -122,6 +124,7 @@ app.ws('/ws', (ws, _req) => {
       if (tiktokChatUsername) {
         try {
           tiktokChatClient = await getTiktokChatClient(tiktokChatUsername)
+          tiktokChatClient.connectedClients++
           didConnect = false
 
           tiktokChatClient.on('connected', () => {
@@ -179,6 +182,8 @@ app.ws('/ws', (ws, _req) => {
             kickChatroomId,
             kickChannelId,
           )
+          kickChatClient.connectedClients++
+
           let didConnect = false
 
           kickChatClient.on('connected', () => {
@@ -218,23 +223,38 @@ app.ws('/ws', (ws, _req) => {
 
   ws.on('close', () => {
     if (slobsDonationClient) {
-      slobsDonationClient.close()
+      const hasListeners = slobsDonationClient.close()
+      if (!hasListeners) {
+        slobsDonationClient.removeAllListeners()
+      }
     }
 
     if (tiktokGiftClient) {
-      tiktokGiftClient.close()
+      const hasListeners = tiktokGiftClient.close()
+      if (!hasListeners) {
+        tiktokGiftClient.removeAllListeners()
+      }
     }
 
     if (tiktokChatClient) {
-      tiktokChatClient.close()
+      const hasListeners = tiktokChatClient.close()
+      if (!hasListeners) {
+        tiktokChatClient.removeAllListeners()
+      }
     }
 
     if (youtubeChatClient) {
-      youtubeChatClient.close()
+      const hasListeners = youtubeChatClient.close()
+      if (!hasListeners) {
+        youtubeChatClient.removeAllListeners()
+      }
     }
 
     if (kickChatClient) {
-      kickChatClient.close()
+      const hasListeners = kickChatClient.close()
+      if (!hasListeners) {
+        kickChatClient.removeAllListeners()
+      }
     }
 
     console.log('[INFO] Disconnected from client')

@@ -22,6 +22,7 @@ class TikTokChat extends EventEmitter {
 
     this.username = tiktokUsername
     this.tiktokClient = null
+    this.connectedClients = 0
   }
 
   async connect() {
@@ -79,8 +80,13 @@ class TikTokChat extends EventEmitter {
   }
 
   close() {
+    if (this.connectedClients > 1) {
+      this.connectedClients--
+      return true
+    }
+
     if (!this.tiktokClient) {
-      return
+      return true
     }
 
     if (tiktokChatClients.has(this.username)) {
@@ -91,6 +97,7 @@ class TikTokChat extends EventEmitter {
     this.tiktokClient = null
 
     console.log('[INFO] Tiktok chat disconnected')
+    return true
   }
 }
 

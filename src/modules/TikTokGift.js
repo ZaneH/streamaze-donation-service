@@ -23,6 +23,7 @@ class TikTokGift extends EventEmitter {
     this.tiktokClient = null
     this.username = username
     this.diamondThreshold = 100
+    this.connectedClients = 0
   }
 
   parseGift(data) {
@@ -108,8 +109,13 @@ class TikTokGift extends EventEmitter {
   }
 
   close() {
+    if (this.connectedClients > 1) {
+      this.connectedClients--
+      return true
+    }
+
     if (!this.tiktokClient) {
-      return
+      return true
     }
 
     if (tiktokGiftClients.has(this.username)) {
@@ -120,6 +126,7 @@ class TikTokGift extends EventEmitter {
     this.tiktokClient = null
 
     console.log('[INFO] Disconnected from TikTok gift listener')
+    return false
   }
 }
 
