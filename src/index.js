@@ -99,13 +99,18 @@ app.ws('/ws', (ws, _req) => {
                   'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                  streamer_id: 1,
+                  streamer_id: 1, // TODO: Make this dynamic
                   type: donationType,
                   sender: donationData.name,
                   pfp: donationData.pfp,
                   amount_in_usd: donationData.amount, // TODO: Convert amount to USD
                   message: donationData.message,
                   tts_url: donationData.tts_url,
+                  metadata: {
+                    emotes: donationData.emotes,
+                    pfp: donationData.pfp,
+                    tts_url: donationData.tts_url,
+                  },
                   value: {
                     amount: donationData.amount * 100,
                     currency: donationData.currency,
