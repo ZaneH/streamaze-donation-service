@@ -7,6 +7,7 @@ const { getKickChatClient } = require('./modules/KickChat')
 const { updateKV } = require('./modules/Lanyard')
 const express = require('express')
 const enableWs = require('express-ws')
+const fetch = require('node-fetch')
 const {
   startBroadcast,
   startServer,
@@ -86,8 +87,39 @@ app.ws('/ws', (ws, _req) => {
 
           slobsDonationClient = await getStreamlabsDonationClient(streamToken)
           slobsDonationClient.connectedClients++
-          slobsDonationClient.on('streamlabsEvent', (data) => {
-            ws.send(JSON.stringify(data))
+          slobsDonationClient.on('streamlabsEvent', async (data) => {
+            const donationData = data?.data
+            const donationType = data?.type
+            console.log(donationType, donationData)
+            const resp = await fetch(
+              `${process.env.STREAMAZE_STORAGE_API_URL}/api/donations`,
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  streamer_id: 1,
+                  type: donationType,
+                  sender: donationData.name,
+                  pfp: donationData.pfp,
+                  amount_in_usd: donationData.amount, // TODO: Convert amount to USD
+                  message: donationData.message,
+                  tts_url: donationData.tts_url,
+                  value: {
+                    amount: donationData.amount * 100,
+                    currency: donationData.currency,
+                  },
+                }),
+              },
+            )
+
+            if (resp.ok) {
+              console.log('Created a donation')
+            } else {
+              console.log(await resp.text())
+              console.log('Failed to create a donation')
+            }
           })
         } catch (e) {
           console.error(e)
