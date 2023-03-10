@@ -17,6 +17,7 @@ const {
 const cors = require('cors')
 const { stopRPi } = require('./modules/RPi')
 const { oneUSDToBaht } = require('./utils/ExchangeRate')
+const { storeDonation } = require('./utils/Storage')
 const app = express()
 const wsInstance = enableWs(app)
 
@@ -53,6 +54,7 @@ app.ws('/ws', (ws, _req) => {
     ws.isAlive = true
 
     let payload
+    let streamerId // for assigning donations to a streamer
     let tiktokChatUsername // for TikTok chat
     let youtubeChatUrl // for YouTube chat
     let streamToken // for StreamLabs donations
@@ -63,6 +65,7 @@ app.ws('/ws', (ws, _req) => {
     try {
       payload = JSON.parse(message)
 
+      streamerId = payload?.streamerId
       tiktokChatUsername = payload?.tiktokChat
       youtubeChatUrl = payload?.youtubeChat
       streamToken = payload?.streamToken
@@ -88,109 +91,90 @@ app.ws('/ws', (ws, _req) => {
           slobsDonationClient = await getStreamlabsDonationClient(streamToken)
           slobsDonationClient.connectedClients++
           slobsDonationClient.on('streamlabsEvent', async (data) => {
+            // Send donation data to Streamaze storage API
+
             const donationData = data?.data
             const donationType = data?.type
             if (donationType === 'superchat') {
-              const resp = await fetch(
-                `${process.env.STREAMAZE_STORAGE_API_URL}/api/donations`,
-                {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({
-                    streamer_id: 1, // TODO: Make this dynamic
-                    type: donationType,
-                    sender: donationData.name,
-                    pfp: donationData.pfp,
-                    amount_in_usd: donationData.amount, // TODO: Convert amount to USD
-                    message: donationData.message,
-                    metadata: {
-                      emotes: donationData.emotes,
-                      pfp: donationData.pfp,
-                      tts_url: donationData.tts_url,
-                    },
-                    value: {
-                      amount: donationData.amount * 100,
-                      currency: donationData.currency,
-                    },
-                  }),
+              storeDonation({
+                streamerId,
+                type: donationType,
+                sender: donationData.name,
+                message: donationData.message,
+                amount_in_usd: donationData.amount,
+                amount: donationData.amount * 100,
+                currency: donationData.currency,
+                metadata: {
+                  donation_id: donationData.id,
+                  emotes: donationData.emotes,
+                  pfp: donationData.pfp,
+                  tts_url: donationData.tts_url,
                 },
-              )
-
-              if (resp.ok) {
-                console.log('Created a donation')
-              } else {
-                console.log(await resp.text())
-                console.log('Failed to create a donation')
-              }
+              })
             } else if (donationType === 'subscription') {
-              const resp = await fetch(
-                `${process.env.STREAMAZE_STORAGE_API_URL}/api/donations`,
-                {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({
-                    streamer_id: 1, // TODO: Make this dynamic
-                    type: donationType,
-                    sender: donationData.name,
-                    pfp: donationData.pfp,
-                    amount_in_usd: donationData.amount.months * 4.99, // TODO: Convert amount to USD
-                    message: donationData.message,
-                    metadata: {
-                      emotes: donationData.emotes,
-                      pfp: donationData.pfp,
-                      months: donationData.amount.months,
-                    },
-                    value: {
-                      amount: donationData.amount.months * 4.99 * 100,
-                      currency: 'usd',
-                    },
-                  }),
+              storeDonation({
+                streamerId,
+                type: donationType,
+                sender: donationData.name,
+                message: donationData.message,
+                amount_in_usd: donationData.amount.months * 4.99,
+                amount: donationData.amount.months * 4.99 * 100,
+                currency: 'usd',
+                metadata: {
+                  donation_id: donationData.id,
+                  emotes: donationData.emotes,
+                  pfp: donationData.pfp,
+                  months: donationData.amount.months,
                 },
-              )
-
-              if (resp.ok) {
-                console.log('Created a donation')
-              } else {
-                console.log(await resp.text())
-                console.log('Failed to create a donation')
-              }
+              })
             } else if (donationType === 'donation') {
-              const resp = await fetch(
-                `${process.env.STREAMAZE_STORAGE_API_URL}/api/donations`,
-                {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({
-                    streamer_id: 1, // TODO: Make this dynamic
-                    type: donationType,
-                    sender: donationData.name,
-                    amount_in_usd: donationData.amount, // TODO: Convert amount to USD
-                    message: donationData.message,
-                    metadata: {
-                      emotes: donationData.emotes,
-                      pfp: donationData.pfp,
-                      tts_url: donationData.tts_url,
-                    },
-                    value: {
-                      amount: donationData.amount * 100,
-                      currency: donationData.currency,
-                    },
-                  }),
+              storeDonation({
+                streamerId,
+                type: donationType,
+                sender: donationData.name,
+                message: donationData.message,
+                amount_in_usd: donationData.amount,
+                amount: donationData.amount * 100,
+                currency: donationData.currency,
+                metadata: {
+                  donation_id: donationData.id,
+                  emotes: donationData.emotes,
+                  pfp: donationData.pfp,
+                  tts_url: donationData.tts_url,
                 },
-              )
-
-              if (resp.ok) {
-                console.log('Created a donation')
-              } else {
-                console.log(await resp.text())
-                console.log('Failed to create a donation')
-              }
+              })
+            } else if (donationType === 'membershipGift') {
+              storeDonation({
+                streamerId,
+                type: donationType,
+                sender: donationData.name,
+                // TODO: Figure out how to get the actual gift amount
+                amount_in_usd: donationData.amount.giftCount * 4.99,
+                amount: donationData.amount.giftCount * 4.99 * 100,
+                currency: 'usd',
+                metadata: {
+                  donation_id: donationData.id,
+                  pfp: donationData.pfp,
+                  gift_count: donationData.amount.giftCount,
+                  gift_level: donationData.amount.giftLevel,
+                },
+              })
+            } else if (donationType === 'mediaShareEvent') {
+              storeDonation({
+                streamerId,
+                type: donationType,
+                sender: donationData.action_by,
+                metadata: {
+                  action: donationData.action,
+                  action_by: donationData.action_by,
+                  donation_id: donationData.donation_id,
+                  media_title: donationData.media_title,
+                  media_type: donationData.media_type,
+                  media_link: donationData.media_link,
+                  media_thumbnail: donationData.media_thumbnail,
+                  duration: donationData.duration,
+                },
+              })
             }
           })
         } catch (e) {

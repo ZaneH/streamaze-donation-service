@@ -161,10 +161,11 @@ class StreamLabsDonation extends EventEmitter {
                   data: {
                     id: m?.['_id'],
                     name: m.name,
-                    // TODO: gift_* should go into amount: {}
-                    gift_count: m?.giftMembershipsCount,
-                    gift_level: m?.giftMembershipsLevelName,
                     pfp: await getPFPFromChannelId(m?.channelUrl),
+                    amount: {
+                      giftCount: m?.giftMembershipsCount,
+                      giftLevel: m?.giftMembershipsLevelName,
+                    },
                   },
                 })
               }
@@ -182,12 +183,13 @@ class StreamLabsDonation extends EventEmitter {
                 const { modMoveToNext } = message || {}
 
                 if (modMoveToNext === true) {
-                  this.emit('streamlabsEvent', {
-                    type,
-                    data: {
-                      action: 'modMoveToNext',
-                    },
-                  })
+                  // TODO: emit info to skip media without storing in DB
+                  // this.emit('streamlabsEvent', {
+                  //   type,
+                  //   data: {
+                  //     action: 'modMoveToNext',
+                  //   },
+                  // })
                 } else {
                   // emit info to play media
                   let youtubeUrl
