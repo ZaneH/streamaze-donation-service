@@ -96,7 +96,7 @@ app.ws('/ws', (ws, _req) => {
             const donationData = data?.data
             const donationType = data?.type
             if (donationType === 'superchat') {
-              storeDonation({
+              await storeDonation({
                 streamerId,
                 type: donationType,
                 sender: donationData.name,
@@ -112,7 +112,7 @@ app.ws('/ws', (ws, _req) => {
                 },
               })
             } else if (donationType === 'subscription') {
-              storeDonation({
+              await storeDonation({
                 streamerId,
                 type: donationType,
                 sender: donationData.name,
@@ -128,7 +128,7 @@ app.ws('/ws', (ws, _req) => {
                 },
               })
             } else if (donationType === 'donation') {
-              storeDonation({
+              await storeDonation({
                 streamerId,
                 type: donationType,
                 sender: donationData.name,
@@ -144,7 +144,7 @@ app.ws('/ws', (ws, _req) => {
                 },
               })
             } else if (donationType === 'membershipGift') {
-              storeDonation({
+              await storeDonation({
                 streamerId,
                 type: donationType,
                 sender: donationData.name,
@@ -160,10 +160,13 @@ app.ws('/ws', (ws, _req) => {
                 },
               })
             } else if (donationType === 'mediaShareEvent') {
-              storeDonation({
+              await storeDonation({
                 streamerId,
-                type: donationType,
+                type: 'streamlabs_media',
                 sender: donationData.action_by,
+                amount_in_usd: donationData?.donation?.amount,
+                amount: donationData?.donation?.amount * 100,
+                currency: donationData?.donation?.currency,
                 metadata: {
                   action: donationData.action,
                   action_by: donationData.action_by,

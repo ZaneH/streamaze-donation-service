@@ -1,4 +1,6 @@
-export const storeDonation = async ({
+const fetch = require('node-fetch')
+
+const storeDonation = async ({
   streamerId,
   type,
   sender,
@@ -36,4 +38,8 @@ export const storeDonation = async ({
     console.log(await resp.text())
     console.log('Failed to create a donation')
   }
+}
+
+module.exports = {
+  storeDonation,
 }

@@ -214,6 +214,14 @@ class StreamLabsDonation extends EventEmitter {
                       media_link: youtubeUrl,
                       media_thumbnail: thumbnailUrl,
                       duration: media?.duration,
+                      donation:
+                        media?.donation ??
+                        process.env.NODE_ENV === 'development'
+                          ? {
+                              amount: 1,
+                              currency: 'usd',
+                            }
+                          : {},
                     },
                   })
                 }
