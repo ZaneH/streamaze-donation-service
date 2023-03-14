@@ -18,10 +18,10 @@ const storeDonation = async ({
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        streamer_id: streamerId, // TODO: Make this dynamic
+        streamer_id: streamerId,
         type,
         sender,
-        amount_in_usd, // TODO: Convert amount to USD
+        amount_in_usd, // TODO: Convert amount to USD server-side
         message,
         metadata,
         value: {
