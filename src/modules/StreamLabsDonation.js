@@ -206,7 +206,7 @@ class StreamLabsDonation extends EventEmitter {
                   this.emit('streamlabsEvent', {
                     type,
                     data: {
-                      action: media?.action,
+                      action: mediaEvent,
                       action_by: media?.action_by,
                       donation_id: media?.donation_id ?? media?.id,
                       media_title: media?.media_title,
