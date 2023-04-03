@@ -58,6 +58,9 @@ app.ws('/ws', (ws, _req) => {
     let tiktokChatUsername // for TikTok chat
     let youtubeChatUrl // for YouTube chat
     let streamToken // for StreamLabs donations
+    let ttsService // for TTS
+    let streamazeKey // for TTS right now
+    // let streamlabsVoice // for StreamLabs TTS
     let tiktokDonoUsername // for TikTok gifts
     let kickChatroomId // for Kick chat
     let kickChannelId // for Kick chat
@@ -69,6 +72,9 @@ app.ws('/ws', (ws, _req) => {
       tiktokChatUsername = payload?.tiktokChat
       youtubeChatUrl = payload?.youtubeChat
       streamToken = payload?.streamToken
+      ttsService = payload?.ttsService
+      streamazeKey = payload?.streamazeKey
+      // streamlabsVoice = payload?.streamlabsVoice
       tiktokDonoUsername = payload?.tiktokDonos
       kickChatroomId = payload?.kickChatroomId
       kickChannelId = payload?.kickChannelId
@@ -88,7 +94,11 @@ app.ws('/ws', (ws, _req) => {
             }
           }
 
-          slobsDonationClient = await getStreamlabsDonationClient(streamToken)
+          slobsDonationClient = await getStreamlabsDonationClient(
+            streamToken,
+            ttsService,
+            streamazeKey,
+          )
           slobsDonationClient.connectedClients++
           slobsDonationClient.on('streamlabsEvent', async (data) => {
             // Send donation data to Streamaze storage API

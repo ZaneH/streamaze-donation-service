@@ -5,12 +5,16 @@ const { getPFPFromChannelId } = require('../utils/PFP')
 
 const streamlabsDonationClients = new Map()
 
-async function getStreamlabsDonationClient(streamToken) {
+async function getStreamlabsDonationClient(
+  streamToken,
+  ttsService,
+  streamazeKey,
+) {
   if (streamlabsDonationClients.has(streamToken)) {
     return streamlabsDonationClients.get(streamToken)
   }
 
-  const client = new StreamLabsDonation(streamToken)
+  const client = new StreamLabsDonation(streamToken, ttsService, streamazeKey)
   streamlabsDonationClients.set(streamToken, client)
 
   await client.connect()
@@ -19,10 +23,12 @@ async function getStreamlabsDonationClient(streamToken) {
 }
 
 class StreamLabsDonation extends EventEmitter {
-  constructor(streamToken) {
+  constructor(streamToken, ttsService = 'streamlabs', streamazeKey = '') {
     super()
 
     this.streamToken = streamToken
+    this.ttsService = ttsService
+    this.streamazeKey = streamazeKey
     this.slobsSocket = null
     this.heartbeat = null
     this.connectedClients = 0
@@ -41,23 +47,46 @@ class StreamLabsDonation extends EventEmitter {
       return
     }
 
-    const tts = await fetch('https://streamlabs.com/polly/speak', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        text: exactMessage ? message : `${message?.name} said ${text}`,
-        voice,
-      }),
-    })
+    // TODO: Put this in a TTS module / util
+    if (this.ttsService === 'streamlabs') {
+      const tts = await fetch('https://streamlabs.com/polly/speak', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: exactMessage ? message : `${message?.name} said ${text}`,
+          voice,
+        }),
+      })
 
-    if (!tts.ok) {
-      throw new Error('TTS error')
+      if (!tts.ok) {
+        return
+      }
+
+      const ttsData = await tts.json()
+      return ttsData?.speak_url
+    } else if (this.ttsService === 'elevenlabs') {
+      const tts = await fetch(
+        `${process.env.STREAMAZE_STORAGE_API_URL}/api/tts?api_key=${this.streamazeKey}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            text: exactMessage ? message : `${message?.name} said ${text}`,
+          }),
+        },
+      )
+
+      if (!tts.ok) {
+        return
+      }
+
+      const ttsData = await tts.json()
+      return ttsData?.data?.speak_url
     }
-
-    const ttsData = await tts.json()
-    return ttsData?.speak_url
   }
 
   async connect() {
