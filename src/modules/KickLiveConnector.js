@@ -124,7 +124,7 @@ class KickLiveChat extends EventEmitter {
                 const [, id, name] = match
                 return {
                   url: `https://files.kick.com/emotes/${id}/fullsize`,
-                  keys: `[emote:${id}:${name}]`,
+                  keys: `[emote:${id}:${name ?? ''}]`,
                 }
               },
             )
