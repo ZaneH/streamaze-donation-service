@@ -133,7 +133,7 @@ class KickLiveChat extends EventEmitter {
 
             const { username, verified, is_subscribed, profile_thumb, role } =
               user
-            const isMod = role === 'Channel Host'
+            const isMod = role === 'Moderator'
             const isOwner = role === 'Channel Host'
 
             this.emit('message', {
