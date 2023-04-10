@@ -117,7 +117,7 @@ class KickLiveChat extends EventEmitter {
           } else {
             const { message: messageText } = message
             // parse emojis they look like [emote:id_num:name]
-            const emojiRegex = /\[emote:(\d+):([^\]]+)\]/g
+            const emojiRegex = /\[emote:(\d+):([^\]]*)*\]/g
             // find all emojis in the messageText and create {url, keys} objects
             const allEmoji = [...messageText.matchAll(emojiRegex)].map(
               (match) => {
@@ -129,7 +129,19 @@ class KickLiveChat extends EventEmitter {
               },
             )
 
-            const uniqueEmoji = [...new Set(allEmoji)]
+            // check for kick emotes
+            const kickEmoteRegex = /\[emoji:(\w+)*\]/g
+            const kickEmotes = [...messageText.matchAll(kickEmoteRegex)].map(
+              (match) => {
+                const [, name] = match
+                return {
+                  url: `https://dbxmjjzl5pc1g.cloudfront.net/a984b19b-fb89-450b-b4c3-6e4fadd199c9/images/emojis/${name}.png`,
+                  keys: `[emoji:${name}]`,
+                }
+              },
+            )
+
+            const uniqueEmoji = [...new Set([...allEmoji, ...kickEmotes])]
 
             const { username, verified, is_subscribed, profile_thumb, role } =
               user
