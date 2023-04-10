@@ -96,6 +96,12 @@ class KickLiveChat extends EventEmitter {
           const jsonData = JSON.parse(data)
           const { message } = jsonData
           const { user } = jsonData
+          const {
+            follower_badges,
+            quantity_gifted,
+            months_subscribed,
+            is_founder,
+          } = user
 
           // handle subscriptions
           if (message?.action === 'subscribe') {
@@ -148,6 +154,17 @@ class KickLiveChat extends EventEmitter {
             const isMod = role === 'Moderator'
             const isOwner = role === 'Channel Host'
 
+            const badges = []
+            if (is_founder) {
+              badges.push('Founder')
+            }
+
+            if (parseInt(quantity_gifted) > 0) {
+              badges.push('Gifter')
+            }
+
+            badges.push(...follower_badges)
+
             this.emit('message', {
               sender: username,
               message: messageText,
@@ -158,6 +175,7 @@ class KickLiveChat extends EventEmitter {
               is_verified: verified,
               is_member: is_subscribed,
               emotes: uniqueEmoji,
+              badges,
             })
           }
         } else if (
