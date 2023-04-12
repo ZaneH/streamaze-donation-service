@@ -79,7 +79,7 @@ app.ws('/ws', (ws, _req) => {
       kickChatroomId = payload?.kickChatroomId
       kickChannelId = payload?.kickChannelId
 
-      if (streamToken) {
+      if (streamToken && streamerId) {
         try {
           // Alias for Sam's key
           const samAlias = process.env.SAM_SOCKET_TOKEN_ALIAS
@@ -127,6 +127,7 @@ app.ws('/ws', (ws, _req) => {
                 type: donationType,
                 sender: donationData.name,
                 message: donationData.message,
+                // TODO: Figure out how to get the actual subscription amount
                 amount_in_usd: donationData.amount.months * 4.99,
                 amount: donationData.amount.months * 4.99 * 100,
                 currency: 'usd',
@@ -295,12 +296,35 @@ app.ws('/ws', (ws, _req) => {
             ws.send(JSON.stringify(data))
           })
 
-          kickChatClient.on('kickSub', (data) => {
-            ws.send(JSON.stringify(data))
+          kickChatClient.on('kickSub', async ({ data }) => {
+            await storeDonation({
+              streamerId,
+              type: 'kick_subscription',
+              sender: data.name,
+              amount_in_usd: parseInt(data.amount.months) * 4.99,
+              amount: parseInt(data.amount.months) * 4.99 * 100,
+              currency: 'usd',
+              metadata: {
+                id: data.id,
+                pfp: data.pfp,
+                months: data.amount.months,
+              },
+            })
           })
 
-          kickChatClient.on('kickGiftedSub', (data) => {
-            ws.send(JSON.stringify(data))
+          kickChatClient.on('kickGiftedSub', async ({ data }) => {
+            await storeDonation({
+              streamerId,
+              type: 'kick_gifted_subscription',
+              sender: data.name,
+              amount_in_usd: parseInt(data.amount.months) * 4.99,
+              amount: parseInt(data.amount.months) * 4.99 * 100,
+              currency: 'usd',
+              metadata: {
+                id: data.id,
+                months: data.amount.months,
+              },
+            })
           })
 
           kickChatClient.on('end', () => {
