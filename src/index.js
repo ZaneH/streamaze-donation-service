@@ -278,7 +278,7 @@ app.ws('/ws', (ws, _req) => {
         }
       }
 
-      if (kickChatroomId && kickChannelId) {
+      if (kickChatroomId && kickChannelId && streamerId) {
         try {
           kickChatClient = await getKickChatClient(
             kickChatroomId,

@@ -120,7 +120,7 @@ class KickLiveChat extends EventEmitter {
                 },
               },
             })
-          } else {
+          } else if (message?.type === 'message') {
             const { message: messageText } = message
             // parse emojis they look like [emote:id_num:name]
             const emojiRegex = /\[emote:(\d+):([^\]]*)*\]/g
@@ -177,6 +177,8 @@ class KickLiveChat extends EventEmitter {
               emotes: uniqueEmoji,
               badges,
             })
+          } else {
+            console.log('[INFO] Unhandled Kick message', jsonMsg)
           }
         } else if (
           jsonMsg?.event ===
