@@ -5,16 +5,12 @@ const { getPFPFromChannelId } = require('../utils/PFP')
 
 const streamlabsDonationClients = new Map()
 
-async function getStreamlabsDonationClient(
-  streamToken,
-  ttsService,
-  streamazeKey,
-) {
+async function getStreamlabsDonationClient(streamToken, streamazeKey, options) {
   if (streamlabsDonationClients.has(streamToken)) {
     return streamlabsDonationClients.get(streamToken)
   }
 
-  const client = new StreamLabsDonation(streamToken, ttsService, streamazeKey)
+  const client = new StreamLabsDonation(streamToken, streamazeKey, options)
   streamlabsDonationClients.set(streamToken, client)
 
   await client.connect()
@@ -23,11 +19,17 @@ async function getStreamlabsDonationClient(
 }
 
 class StreamLabsDonation extends EventEmitter {
-  constructor(streamToken, ttsService = 'streamlabs', streamazeKey = '') {
+  constructor(
+    streamToken,
+    streamazeKey = '',
+    options = {
+      ttsService,
+    },
+  ) {
     super()
 
     this.streamToken = streamToken
-    this.ttsService = ttsService
+    this.ttsService = options?.ttsService || 'streamlabs'
     this.streamazeKey = streamazeKey
     this.slobsSocket = null
     this.heartbeat = null

@@ -96,8 +96,10 @@ app.ws('/ws', (ws, _req) => {
 
           slobsDonationClient = await getStreamlabsDonationClient(
             streamToken,
-            ttsService,
             streamazeKey,
+            {
+              ttsService,
+            },
           )
           slobsDonationClient.connectedClients++
           slobsDonationClient.on('streamlabsEvent', async (data) => {
