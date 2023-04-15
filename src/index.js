@@ -133,6 +133,7 @@ app.ws('/ws', (ws, _req) => {
                 amount_in_usd: donationData.amount.months * 4.99,
                 amount: donationData.amount.months * 4.99 * 100,
                 currency: 'usd',
+                months: donationData.amount.months,
                 metadata: {
                   donation_id: donationData.id,
                   emotes: donationData.emotes,
@@ -165,6 +166,7 @@ app.ws('/ws', (ws, _req) => {
                 amount_in_usd: donationData.amount.giftCount * 4.99,
                 amount: donationData.amount.giftCount * 4.99 * 100,
                 currency: 'usd',
+                months: donationData.amount.giftCount,
                 metadata: {
                   donation_id: donationData.id,
                   pfp: donationData.pfp,
@@ -306,6 +308,7 @@ app.ws('/ws', (ws, _req) => {
               amount_in_usd: parseInt(data.amount.months) * 4.99,
               amount: parseInt(data.amount.months) * 4.99 * 100,
               currency: 'usd',
+              months: data.amount.months,
               metadata: {
                 id: data.id,
                 pfp: data.pfp,
@@ -322,6 +325,7 @@ app.ws('/ws', (ws, _req) => {
               amount_in_usd: parseInt(data.amount.months) * 4.99,
               amount: parseInt(data.amount.months) * 4.99 * 100,
               currency: 'usd',
+              months: data.amount.months,
               metadata: {
                 id: data.id,
                 months: data.amount.months,

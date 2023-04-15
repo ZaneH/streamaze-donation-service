@@ -9,6 +9,7 @@ const storeDonation = async ({
   metadata,
   amount,
   currency,
+  months,
 }) => {
   try {
     let amountInUSD = amount_in_usd
@@ -41,6 +42,7 @@ const storeDonation = async ({
           amount_in_usd: amountInUSD,
           message,
           metadata,
+          months,
           value: {
             amount,
             currency,
