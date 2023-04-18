@@ -159,7 +159,11 @@ class KickLiveChat extends EventEmitter {
               badges.push('Founder')
             }
 
-            if (parseInt(quantity_gifted) > 0) {
+            if (parseInt(quantity_gifted) >= 50) {
+              badges.push('Gifter50')
+            } else if (parseInt(quantity_gifted) >= 25) {
+              badges.push('Gifter25')
+            } else if (parseInt(quantity_gifted) > 0) {
               badges.push('Gifter')
             }
 
