@@ -244,6 +244,7 @@ class KickLiveChat extends EventEmitter {
           const isMod = badges.includes('moderator')
           const isSubscribed = badges.includes('subscriber')
           const isVerified = badges.includes('verified')
+          const isOwner = badges.includes('broadcaster')
 
           const uniqueEmoji = mapKickEmoji(content)
 
@@ -253,7 +254,7 @@ class KickLiveChat extends EventEmitter {
             message: content,
             origin: 'kick',
             is_mod: isMod,
-            // is_owner: isOwner,
+            is_owner: isOwner,
             is_verified: isVerified,
             is_member: isSubscribed,
             gifted_count:
