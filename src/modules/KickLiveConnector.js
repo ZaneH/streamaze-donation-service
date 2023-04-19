@@ -124,6 +124,7 @@ class KickLiveChat extends EventEmitter {
 
           // handle subscriptions
           if (message?.action === 'subscribe') {
+            // V1 Kick subs
             const monthsSubscribed = parseInt(message?.months_subscribed)
             const { profile_thumb, username } = user
 
@@ -140,6 +141,7 @@ class KickLiveChat extends EventEmitter {
               },
             })
           } else if (message?.type === 'message') {
+            // V1 Kick messages
             const { message: messageText } = message
 
             const uniqueEmoji = mapKickEmoji(messageText)
@@ -183,6 +185,7 @@ class KickLiveChat extends EventEmitter {
           jsonMsg?.event ===
           'App\\Events\\LuckyUsersWhoGotGiftSubscriptionsEvent'
         ) {
+          // V1 Kick gifted subs
           const { data } = jsonMsg // data is another json string
           const jsonData = JSON.parse(data)
           const { usernames, gifter_username } = jsonData
@@ -205,6 +208,7 @@ class KickLiveChat extends EventEmitter {
             },
           })
         } else if (jsonMsg?.event === 'App\\Events\\GiftedSubscriptionsEvent') {
+          // V2 Kick gifted subs
           const { data } = jsonMsg // data is another json string
           const jsonData = JSON.parse(data)
           const { gifted_usernames, gifter_username } = jsonData
@@ -235,6 +239,7 @@ class KickLiveChat extends EventEmitter {
         } else if (jsonMsg?.event === 'pusher:pong') {
           // noop
         } else if (jsonMsg?.event === 'App\\Events\\ChatMessageEvent') {
+          // V2 Kick messages
           const { data } = jsonMsg // data is another json string
           const jsonData = JSON.parse(data)
           const { id: msgId, sender, content } = jsonData
@@ -261,6 +266,23 @@ class KickLiveChat extends EventEmitter {
               fullBadges.find((b) => b.type === 'sub_gifter')?.count || 0,
             emotes: uniqueEmoji,
             badges,
+          })
+        } else if (jsonMsg?.event === 'App\\Events\\SubscriptionEvent') {
+          // V2 Kick sub
+          const { data } = jsonMsg // data is another json string
+          const jsonData = JSON.parse(data)
+          const { months } = jsonData
+
+          this.emit('kickSub', {
+            type: 'kickSub',
+            data: {
+              id: Math.floor(Math.random() * 1000000000).toString(),
+              name: jsonData.username,
+              displayString: 'just subscribed on Kick!',
+              amount: {
+                months,
+              },
+            },
           })
         } else {
           console.log('[INFO] Unhandled Kick message', jsonMsg)
