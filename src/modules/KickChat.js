@@ -3,16 +3,20 @@ const KickLiveConnector = require('./KickLiveConnector')
 
 const kickChatClients = new Map()
 
-async function getKickChatClient(kickChatroomId, kickChannelId) {
-  if (kickChatClients.has(kickChatroomId)) {
-    return kickChatClients.get(kickChatroomId)
+async function getKickChatClient(
+  options = {
+    kickChannelId,
+    kickChatroomId,
+    kickChannelName,
+  },
+) {
+  // TODO: use a hash of the options to create a unique key
+  if (kickChatClients.has(options.kickChannelName)) {
+    return kickChatClients.get(options.kickChannelName)
   }
 
-  const client = new KickChat({
-    chatroomId: kickChatroomId,
-    channelId: kickChannelId,
-  })
-  kickChatClients.set(kickChatroomId, client)
+  const client = new KickChat(options)
+  kickChatClients.set(options.kickChannelName, client)
 
   await client.connect()
 
@@ -20,18 +24,33 @@ async function getKickChatClient(kickChatroomId, kickChannelId) {
 }
 
 class KickChat extends EventEmitter {
-  constructor({ chatroomId, channelId }) {
+  constructor(
+    options = {
+      kickChannelId,
+      kickChatroomId,
+      kickChannelName,
+    },
+  ) {
     super()
 
-    this.chatroomId = chatroomId
-    this.channelId = channelId
+    this.channelId = options.kickChannelId
+    this.chatroomId = options.kickChatroomId
+    this.channelName = options.kickChannelName
     this.kickClient = null
     this.connectedClients = 0
   }
 
   async connect() {
-    if (!this.chatroomId || !this.channelId) {
-      throw new Error('Missing chatroom/channel ID')
+    if (!this.channelName) {
+      throw new Error('Missing channel name')
+    }
+
+    if (!this.channelId) {
+      throw new Error('Missing channel id')
+    }
+
+    if (!this.chatroomId) {
+      throw new Error('Missing chatroom id')
     }
 
     if (this.kickClient) {
@@ -40,8 +59,9 @@ class KickChat extends EventEmitter {
     }
 
     this.kickClient = new KickLiveConnector({
-      chatroomId: this.chatroomId,
       channelId: this.channelId,
+      chatroomId: this.chatroomId,
+      channelName: this.channelName,
     })
 
     this.kickClient.on('connected', () => {
@@ -75,8 +95,8 @@ class KickChat extends EventEmitter {
       return true
     }
 
-    if (kickChatClients.has(this.chatroomId)) {
-      kickChatClients.delete(this.chatroomId)
+    if (kickChatClients.has(this.channelName)) {
+      kickChatClients.delete(this.channelName)
     }
 
     this.kickClient.disconnect()

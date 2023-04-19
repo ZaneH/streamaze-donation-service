@@ -7,7 +7,6 @@ const { getKickChatClient } = require('./modules/KickChat')
 const { updateKV } = require('./modules/Lanyard')
 const express = require('express')
 const enableWs = require('express-ws')
-const fetch = require('node-fetch')
 const {
   startBroadcast,
   startServer,
@@ -62,8 +61,9 @@ app.ws('/ws', (ws, _req) => {
     let streamazeKey // for TTS right now
     // let streamlabsVoice // for StreamLabs TTS
     let tiktokDonoUsername // for TikTok gifts
-    let kickChatroomId // for Kick chat
     let kickChannelId // for Kick chat
+    let kickChatroomId // for Kick chat
+    let kickChannelName // for Kick chat
 
     try {
       payload = JSON.parse(message)
@@ -76,8 +76,9 @@ app.ws('/ws', (ws, _req) => {
       streamazeKey = payload?.streamazeKey
       // streamlabsVoice = payload?.streamlabsVoice
       tiktokDonoUsername = payload?.tiktokDonos
-      kickChatroomId = payload?.kickChatroomId
       kickChannelId = payload?.kickChannelId
+      kickChatroomId = payload?.kickChatroomId
+      kickChannelName = payload?.kickChannelName
 
       if (streamToken && streamerId) {
         try {
@@ -282,12 +283,13 @@ app.ws('/ws', (ws, _req) => {
         }
       }
 
-      if (kickChatroomId && kickChannelId && streamerId) {
+      if (kickChannelId && kickChatroomId && kickChannelName && streamerId) {
         try {
-          kickChatClient = await getKickChatClient(
-            kickChatroomId,
+          kickChatClient = await getKickChatClient({
             kickChannelId,
-          )
+            kickChatroomId,
+            kickChannelName,
+          })
           kickChatClient.connectedClients++
 
           let didConnect = false
