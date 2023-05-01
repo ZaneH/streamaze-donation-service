@@ -125,21 +125,23 @@ class KickLiveChat extends EventEmitter {
           // handle subscriptions
           if (message?.action === 'subscribe') {
             // V1 Kick subs
-            const monthsSubscribed = parseInt(message?.months_subscribed)
-            const { profile_thumb, username } = user
+            // const monthsSubscribed = parseInt(message?.months_subscribed)
+            // const { profile_thumb, username } = user
 
-            this.emit('kickSub', {
-              type: 'kickSub',
-              data: {
-                id: message?.id,
-                name: username,
-                pfp: profile_thumb,
-                displayString: 'just subscribed on Kick!',
-                amount: {
-                  months: monthsSubscribed || 0,
-                },
-              },
-            })
+            // this.emit('kickSub', {
+            //   type: 'kickSub',
+            //   data: {
+            //     id: message?.id,
+            //     name: username,
+            //     pfp: profile_thumb,
+            //     displayString: 'just subscribed on Kick!',
+            //     amount: {
+            //       months: monthsSubscribed || 0,
+            //     },
+            //   },
+            // })
+
+            console.log("Deprecated call for 'subscribe' action")
           } else if (message?.type === 'message') {
             // V1 Kick messages
             const { message: messageText } = message
@@ -186,27 +188,31 @@ class KickLiveChat extends EventEmitter {
           'App\\Events\\LuckyUsersWhoGotGiftSubscriptionsEvent'
         ) {
           // V1 Kick gifted subs
-          const { data } = jsonMsg // data is another json string
-          const jsonData = JSON.parse(data)
-          const { usernames, gifter_username } = jsonData
+          // const { data } = jsonMsg // data is another json string
+          // const jsonData = JSON.parse(data)
+          // const { usernames, gifter_username } = jsonData
 
-          const amountOfSubs = usernames.length
-          const displayString = `just gifted ${amountOfSubs} sub${
-            amountOfSubs <= 1 ? '' : 's'
-          } on Kick!`
+          // const amountOfSubs = usernames.length
+          // const displayString = `just gifted ${amountOfSubs} sub${
+          //   amountOfSubs <= 1 ? '' : 's'
+          // } on Kick!`
 
-          this.emit('kickGiftedSub', {
-            type: 'kickGiftedSub',
-            data: {
-              id: Math.floor(Math.random() * 1000000000).toString(),
-              name: gifter_username,
-              usernames,
-              displayString,
-              amount: {
-                months: amountOfSubs,
-              },
-            },
-          })
+          // this.emit('kickGiftedSub', {
+          //   type: 'kickGiftedSub',
+          //   data: {
+          //     id: Math.floor(Math.random() * 1000000000).toString(),
+          //     name: gifter_username,
+          //     usernames,
+          //     displayString,
+          //     amount: {
+          //       months: amountOfSubs,
+          //     },
+          //   },
+          // })
+
+          console.log(
+            'Deprecated call for LuckyUsersWhoGotGiftSubscriptionsEvent',
+          )
         } else if (jsonMsg?.event === 'App\\Events\\GiftedSubscriptionsEvent') {
           // V2 Kick gifted subs
           const { data } = jsonMsg // data is another json string
