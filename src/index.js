@@ -320,6 +320,8 @@ app.ws('/ws', (ws, _req) => {
           })
 
           kickChatClient.on('kickGiftedSub', async ({ data }) => {
+            console.log('Debug info', data)
+
             await storeDonation({
               streamerId,
               type: 'kick_gifted_subscription',
