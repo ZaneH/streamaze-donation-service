@@ -102,100 +102,105 @@ app.ws('/ws', (ws, _req) => {
               ttsService,
             },
           )
-          slobsDonationClient.connectedClients++
-          slobsDonationClient.on('streamlabsEvent', async (data) => {
-            // Send donation data to Streamaze storage API
 
-            const donationData = data?.data
-            const donationType = data?.type
-            if (donationType === 'superchat') {
-              await storeDonation({
-                streamerId,
-                type: donationType,
-                sender: donationData.name,
-                message: donationData.message,
-                amount_in_usd: donationData.amount,
-                amount: donationData.amount * 100,
-                currency: donationData.currency,
-                metadata: {
-                  donation_id: donationData.id,
-                  emotes: donationData.emotes,
-                  pfp: donationData.pfp,
-                  tts_url: donationData.tts_url,
-                },
-              })
-            } else if (donationType === 'subscription') {
-              await storeDonation({
-                streamerId,
-                type: donationType,
-                sender: donationData.name,
-                message: donationData.message,
-                // TODO: Figure out how to get the actual subscription amount
-                amount_in_usd: donationData.amount.months * 4.99,
-                amount: donationData.amount.months * 4.99 * 100,
-                currency: 'usd',
-                months: donationData.amount.months,
-                metadata: {
-                  donation_id: donationData.id,
-                  emotes: donationData.emotes,
-                  pfp: donationData.pfp,
+          if (slobsDonationClient.connectedClients > 0) {
+            slobsDonationClient.connectedClients++
+          } else {
+            slobsDonationClient.connectedClients++
+            slobsDonationClient.on('streamlabsEvent', async (data) => {
+              // Send donation data to Streamaze storage API
+
+              const donationData = data?.data
+              const donationType = data?.type
+              if (donationType === 'superchat') {
+                await storeDonation({
+                  streamerId,
+                  type: donationType,
+                  sender: donationData.name,
+                  message: donationData.message,
+                  amount_in_usd: donationData.amount,
+                  amount: donationData.amount * 100,
+                  currency: donationData.currency,
+                  metadata: {
+                    donation_id: donationData.id,
+                    emotes: donationData.emotes,
+                    pfp: donationData.pfp,
+                    tts_url: donationData.tts_url,
+                  },
+                })
+              } else if (donationType === 'subscription') {
+                await storeDonation({
+                  streamerId,
+                  type: donationType,
+                  sender: donationData.name,
+                  message: donationData.message,
+                  // TODO: Figure out how to get the actual subscription amount
+                  amount_in_usd: donationData.amount.months * 4.99,
+                  amount: donationData.amount.months * 4.99 * 100,
+                  currency: 'usd',
                   months: donationData.amount.months,
-                },
-              })
-            } else if (donationType === 'donation') {
-              await storeDonation({
-                streamerId,
-                type: donationType,
-                sender: donationData.name,
-                message: donationData.message,
-                amount_in_usd: donationData.amount,
-                amount: donationData.amount * 100,
-                currency: donationData.currency,
-                metadata: {
-                  donation_id: donationData.id,
-                  emotes: donationData.emotes,
-                  pfp: donationData.pfp,
-                  tts_url: donationData.tts_url,
-                },
-              })
-            } else if (donationType === 'membershipGift') {
-              await storeDonation({
-                streamerId,
-                type: donationType,
-                sender: donationData.name,
-                // TODO: Figure out how to get the actual gift amount
-                amount_in_usd: donationData.amount.giftCount * 4.99,
-                amount: donationData.amount.giftCount * 4.99 * 100,
-                currency: 'usd',
-                months: donationData.amount.giftCount,
-                metadata: {
-                  donation_id: donationData.id,
-                  pfp: donationData.pfp,
-                  gift_count: donationData.amount.giftCount,
-                  gift_level: donationData.amount.giftLevel,
-                },
-              })
-            } else if (donationType === 'mediaShareEvent') {
-              await storeDonation({
-                streamerId,
-                type: 'streamlabs_media',
-                sender: donationData.action_by,
-                amount_in_usd: donationData?.donation?.amount,
-                amount: donationData?.donation?.amount * 100,
-                currency: donationData?.donation?.currency,
-                metadata: {
-                  action: donationData.action,
-                  action_by: donationData.action_by,
-                  donation_id: donationData.donation_id,
-                  media_title: donationData.media_title,
-                  media_type: donationData.media_type,
-                  media_link: donationData.media_link,
-                  media_thumbnail: donationData.media_thumbnail,
-                  duration: donationData.duration,
-                },
-              })
-            }
-          })
+                  metadata: {
+                    donation_id: donationData.id,
+                    emotes: donationData.emotes,
+                    pfp: donationData.pfp,
+                    months: donationData.amount.months,
+                  },
+                })
+              } else if (donationType === 'donation') {
+                await storeDonation({
+                  streamerId,
+                  type: donationType,
+                  sender: donationData.name,
+                  message: donationData.message,
+                  amount_in_usd: donationData.amount,
+                  amount: donationData.amount * 100,
+                  currency: donationData.currency,
+                  metadata: {
+                    donation_id: donationData.id,
+                    emotes: donationData.emotes,
+                    pfp: donationData.pfp,
+                    tts_url: donationData.tts_url,
+                  },
+                })
+              } else if (donationType === 'membershipGift') {
+                await storeDonation({
+                  streamerId,
+                  type: donationType,
+                  sender: donationData.name,
+                  // TODO: Figure out how to get the actual gift amount
+                  amount_in_usd: donationData.amount.giftCount * 4.99,
+                  amount: donationData.amount.giftCount * 4.99 * 100,
+                  currency: 'usd',
+                  months: donationData.amount.giftCount,
+                  metadata: {
+                    donation_id: donationData.id,
+                    pfp: donationData.pfp,
+                    gift_count: donationData.amount.giftCount,
+                    gift_level: donationData.amount.giftLevel,
+                  },
+                })
+              } else if (donationType === 'mediaShareEvent') {
+                await storeDonation({
+                  streamerId,
+                  type: 'streamlabs_media',
+                  sender: donationData.action_by,
+                  amount_in_usd: donationData?.donation?.amount,
+                  amount: donationData?.donation?.amount * 100,
+                  currency: donationData?.donation?.currency,
+                  metadata: {
+                    action: donationData.action,
+                    action_by: donationData.action_by,
+                    donation_id: donationData.donation_id,
+                    media_title: donationData.media_title,
+                    media_type: donationData.media_type,
+                    media_link: donationData.media_link,
+                    media_thumbnail: donationData.media_thumbnail,
+                    duration: donationData.duration,
+                  },
+                })
+              }
+            })
+          }
         } catch (e) {
           console.error(e)
         }
@@ -291,61 +296,64 @@ app.ws('/ws', (ws, _req) => {
             kickChannelName,
           })
 
-          kickChatClient.connectedClients++
-
-          let didConnect = false
-
-          kickChatClient.on('connected', () => {
-            didConnect = true
-          })
-
           kickChatClient.on('kickChat', (data) => {
             ws.send(JSON.stringify(data))
           })
 
-          kickChatClient.on('kickSub', async ({ data }) => {
-            await storeDonation({
-              streamerId,
-              type: 'kick_subscription',
-              sender: data.name,
-              amount_in_usd: parseInt(data.amount.months) * 4.99,
-              amount: parseInt(data.amount.months) * 4.99 * 100,
-              currency: 'usd',
-              months: data.amount.months,
-              metadata: {
-                id: data.id,
-                pfp: data.pfp,
-                months: data.amount.months,
-              },
+          if (kickChatClient.connectedClients > 0) {
+            kickChatClient.connectedClients++
+          } else {
+            kickChatClient.connectedClients++
+            let didConnect = false
+
+            kickChatClient.on('connected', () => {
+              didConnect = true
             })
-          })
 
-          kickChatClient.on('kickGiftedSub', async ({ data }) => {
-            console.log('Debug info', data)
-
-            await storeDonation({
-              streamerId,
-              type: 'kick_gifted_subscription',
-              sender: data.name,
-              amount_in_usd: parseInt(data.amount.months) * 4.99,
-              amount: parseInt(data.amount.months) * 4.99 * 100,
-              currency: 'usd',
-              months: data.amount.months,
-              metadata: {
-                id: data.id,
+            kickChatClient.on('kickSub', async ({ data }) => {
+              await storeDonation({
+                streamerId,
+                type: 'kick_subscription',
+                sender: data.name,
+                amount_in_usd: parseInt(data.amount.months) * 4.99,
+                amount: parseInt(data.amount.months) * 4.99 * 100,
+                currency: 'usd',
                 months: data.amount.months,
-              },
+                metadata: {
+                  id: data.id,
+                  pfp: data.pfp,
+                  months: data.amount.months,
+                },
+              })
             })
-          })
 
-          kickChatClient.on('end', () => {
-            if (!didConnect) {
-              // never connected, so don't terminate the connection
-              return
-            }
+            kickChatClient.on('kickGiftedSub', async ({ data }) => {
+              console.log('Debug info', data)
 
-            ws.terminate()
-          })
+              await storeDonation({
+                streamerId,
+                type: 'kick_gifted_subscription',
+                sender: data.name,
+                amount_in_usd: parseInt(data.amount.months) * 4.99,
+                amount: parseInt(data.amount.months) * 4.99 * 100,
+                currency: 'usd',
+                months: data.amount.months,
+                metadata: {
+                  id: data.id,
+                  months: data.amount.months,
+                },
+              })
+            })
+
+            kickChatClient.on('end', () => {
+              if (!didConnect) {
+                // never connected, so don't terminate the connection
+                return
+              }
+
+              ws.terminate()
+            })
+          }
         } catch (e) {
           console.error(e)
         }
