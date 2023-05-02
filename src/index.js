@@ -231,25 +231,31 @@ app.ws('/ws', (ws, _req) => {
       if (tiktokChatUsername) {
         try {
           tiktokChatClient = await getTiktokChatClient(tiktokChatUsername)
-          tiktokChatClient.connectedClients++
-          didConnect = false
 
-          tiktokChatClient.on('connected', () => {
-            didConnect = true
-          })
+          if (tiktokChatClient.connectedClients > 0) {
+            // don't re-init the event listeners
+            tiktokChatClient.connectedClients++
+          } else {
+            tiktokChatClient.connectedClients++
+            didConnect = false
 
-          tiktokChatClient.on('tiktokChat', (data) => {
-            ws.send(JSON.stringify(data))
-          })
+            tiktokChatClient.on('connected', () => {
+              didConnect = true
+            })
 
-          tiktokChatClient.on('end', () => {
-            if (!didConnect) {
-              // never connected, so don't terminate the connection
-              return
-            }
+            tiktokChatClient.on('tiktokChat', (data) => {
+              ws.send(JSON.stringify(data))
+            })
 
-            ws.terminate()
-          })
+            tiktokChatClient.on('end', () => {
+              if (!didConnect) {
+                // never connected, so don't terminate the connection
+                return
+              }
+
+              ws.terminate()
+            })
+          }
         } catch (e) {
           console.error(e)
         }
@@ -258,26 +264,32 @@ app.ws('/ws', (ws, _req) => {
       if (youtubeChatUrl) {
         try {
           youtubeChatClient = await getYoutubeChatClient(youtubeChatUrl)
-          youtubeChatClient.connectedClients++
 
-          let didConnect = false
+          if (youtubeChatClient.connectedClients > 0) {
+            // don't re-init the event listeners
+            youtubeChatClient.connectedClients++
+          } else {
+            youtubeChatClient.connectedClients++
 
-          youtubeChatClient.on('connected', () => {
-            didConnect = true
-          })
+            let didConnect = false
 
-          youtubeChatClient.on('youtubeChat', (data) => {
-            ws.send(JSON.stringify(data))
-          })
+            youtubeChatClient.on('connected', () => {
+              didConnect = true
+            })
 
-          youtubeChatClient.on('end', () => {
-            if (!didConnect) {
-              // never connected, so don't terminate the connection
-              return
-            }
+            youtubeChatClient.on('youtubeChat', (data) => {
+              ws.send(JSON.stringify(data))
+            })
 
-            ws.terminate()
-          })
+            youtubeChatClient.on('end', () => {
+              if (!didConnect) {
+                // never connected, so don't terminate the connection
+                return
+              }
+
+              ws.terminate()
+            })
+          }
         } catch (e) {
           console.error(e)
         }
@@ -290,61 +302,67 @@ app.ws('/ws', (ws, _req) => {
             kickChatroomId,
             kickChannelName,
           })
-          kickChatClient.connectedClients++
 
-          let didConnect = false
+          if (kickChatClient.connectedClients > 0) {
+            // don't re-init the event listeners
+            kickChatClient.connectedClients++
+          } else {
+            kickChatClient.connectedClients++
 
-          kickChatClient.on('connected', () => {
-            didConnect = true
-          })
+            let didConnect = false
 
-          kickChatClient.on('kickChat', (data) => {
-            ws.send(JSON.stringify(data))
-          })
-
-          kickChatClient.on('kickSub', async ({ data }) => {
-            await storeDonation({
-              streamerId,
-              type: 'kick_subscription',
-              sender: data.name,
-              amount_in_usd: parseInt(data.amount.months) * 4.99,
-              amount: parseInt(data.amount.months) * 4.99 * 100,
-              currency: 'usd',
-              months: data.amount.months,
-              metadata: {
-                id: data.id,
-                pfp: data.pfp,
-                months: data.amount.months,
-              },
+            kickChatClient.on('connected', () => {
+              didConnect = true
             })
-          })
 
-          kickChatClient.on('kickGiftedSub', async ({ data }) => {
-            console.log('Debug info', data)
-
-            await storeDonation({
-              streamerId,
-              type: 'kick_gifted_subscription',
-              sender: data.name,
-              amount_in_usd: parseInt(data.amount.months) * 4.99,
-              amount: parseInt(data.amount.months) * 4.99 * 100,
-              currency: 'usd',
-              months: data.amount.months,
-              metadata: {
-                id: data.id,
-                months: data.amount.months,
-              },
+            kickChatClient.on('kickChat', (data) => {
+              ws.send(JSON.stringify(data))
             })
-          })
 
-          kickChatClient.on('end', () => {
-            if (!didConnect) {
-              // never connected, so don't terminate the connection
-              return
-            }
+            kickChatClient.on('kickSub', async ({ data }) => {
+              await storeDonation({
+                streamerId,
+                type: 'kick_subscription',
+                sender: data.name,
+                amount_in_usd: parseInt(data.amount.months) * 4.99,
+                amount: parseInt(data.amount.months) * 4.99 * 100,
+                currency: 'usd',
+                months: data.amount.months,
+                metadata: {
+                  id: data.id,
+                  pfp: data.pfp,
+                  months: data.amount.months,
+                },
+              })
+            })
 
-            ws.terminate()
-          })
+            kickChatClient.on('kickGiftedSub', async ({ data }) => {
+              console.log('Debug info', data)
+
+              await storeDonation({
+                streamerId,
+                type: 'kick_gifted_subscription',
+                sender: data.name,
+                amount_in_usd: parseInt(data.amount.months) * 4.99,
+                amount: parseInt(data.amount.months) * 4.99 * 100,
+                currency: 'usd',
+                months: data.amount.months,
+                metadata: {
+                  id: data.id,
+                  months: data.amount.months,
+                },
+              })
+            })
+
+            kickChatClient.on('end', () => {
+              if (!didConnect) {
+                // never connected, so don't terminate the connection
+                return
+              }
+
+              ws.terminate()
+            })
+          }
         } catch (e) {
           console.error(e)
         }
