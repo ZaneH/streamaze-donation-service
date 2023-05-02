@@ -231,31 +231,25 @@ app.ws('/ws', (ws, _req) => {
       if (tiktokChatUsername) {
         try {
           tiktokChatClient = await getTiktokChatClient(tiktokChatUsername)
+          tiktokChatClient.connectedClients++
+          didConnect = false
 
-          if (tiktokChatClient.connectedClients > 0) {
-            // don't re-init the event listeners
-            tiktokChatClient.connectedClients++
-          } else {
-            tiktokChatClient.connectedClients++
-            didConnect = false
+          tiktokChatClient.on('connected', () => {
+            didConnect = true
+          })
 
-            tiktokChatClient.on('connected', () => {
-              didConnect = true
-            })
+          tiktokChatClient.on('tiktokChat', (data) => {
+            ws.send(JSON.stringify(data))
+          })
 
-            tiktokChatClient.on('tiktokChat', (data) => {
-              ws.send(JSON.stringify(data))
-            })
+          tiktokChatClient.on('end', () => {
+            if (!didConnect) {
+              // never connected, so don't terminate the connection
+              return
+            }
 
-            tiktokChatClient.on('end', () => {
-              if (!didConnect) {
-                // never connected, so don't terminate the connection
-                return
-              }
-
-              ws.terminate()
-            })
-          }
+            ws.terminate()
+          })
         } catch (e) {
           console.error(e)
         }
@@ -264,32 +258,26 @@ app.ws('/ws', (ws, _req) => {
       if (youtubeChatUrl) {
         try {
           youtubeChatClient = await getYoutubeChatClient(youtubeChatUrl)
+          youtubeChatClient.connectedClients++
 
-          if (youtubeChatClient.connectedClients > 0) {
-            // don't re-init the event listeners
-            youtubeChatClient.connectedClients++
-          } else {
-            youtubeChatClient.connectedClients++
+          let didConnect = false
 
-            let didConnect = false
+          youtubeChatClient.on('connected', () => {
+            didConnect = true
+          })
 
-            youtubeChatClient.on('connected', () => {
-              didConnect = true
-            })
+          youtubeChatClient.on('youtubeChat', (data) => {
+            ws.send(JSON.stringify(data))
+          })
 
-            youtubeChatClient.on('youtubeChat', (data) => {
-              ws.send(JSON.stringify(data))
-            })
+          youtubeChatClient.on('end', () => {
+            if (!didConnect) {
+              // never connected, so don't terminate the connection
+              return
+            }
 
-            youtubeChatClient.on('end', () => {
-              if (!didConnect) {
-                // never connected, so don't terminate the connection
-                return
-              }
-
-              ws.terminate()
-            })
-          }
+            ws.terminate()
+          })
         } catch (e) {
           console.error(e)
         }
@@ -303,66 +291,61 @@ app.ws('/ws', (ws, _req) => {
             kickChannelName,
           })
 
-          if (kickChatClient.connectedClients > 0) {
-            // don't re-init the event listeners
-            kickChatClient.connectedClients++
-          } else {
-            kickChatClient.connectedClients++
+          kickChatClient.connectedClients++
 
-            let didConnect = false
+          let didConnect = false
 
-            kickChatClient.on('connected', () => {
-              didConnect = true
-            })
+          kickChatClient.on('connected', () => {
+            didConnect = true
+          })
 
-            kickChatClient.on('kickChat', (data) => {
-              ws.send(JSON.stringify(data))
-            })
+          kickChatClient.on('kickChat', (data) => {
+            ws.send(JSON.stringify(data))
+          })
 
-            kickChatClient.on('kickSub', async ({ data }) => {
-              await storeDonation({
-                streamerId,
-                type: 'kick_subscription',
-                sender: data.name,
-                amount_in_usd: parseInt(data.amount.months) * 4.99,
-                amount: parseInt(data.amount.months) * 4.99 * 100,
-                currency: 'usd',
+          kickChatClient.on('kickSub', async ({ data }) => {
+            await storeDonation({
+              streamerId,
+              type: 'kick_subscription',
+              sender: data.name,
+              amount_in_usd: parseInt(data.amount.months) * 4.99,
+              amount: parseInt(data.amount.months) * 4.99 * 100,
+              currency: 'usd',
+              months: data.amount.months,
+              metadata: {
+                id: data.id,
+                pfp: data.pfp,
                 months: data.amount.months,
-                metadata: {
-                  id: data.id,
-                  pfp: data.pfp,
-                  months: data.amount.months,
-                },
-              })
+              },
             })
+          })
 
-            kickChatClient.on('kickGiftedSub', async ({ data }) => {
-              console.log('Debug info', data)
+          kickChatClient.on('kickGiftedSub', async ({ data }) => {
+            console.log('Debug info', data)
 
-              await storeDonation({
-                streamerId,
-                type: 'kick_gifted_subscription',
-                sender: data.name,
-                amount_in_usd: parseInt(data.amount.months) * 4.99,
-                amount: parseInt(data.amount.months) * 4.99 * 100,
-                currency: 'usd',
+            await storeDonation({
+              streamerId,
+              type: 'kick_gifted_subscription',
+              sender: data.name,
+              amount_in_usd: parseInt(data.amount.months) * 4.99,
+              amount: parseInt(data.amount.months) * 4.99 * 100,
+              currency: 'usd',
+              months: data.amount.months,
+              metadata: {
+                id: data.id,
                 months: data.amount.months,
-                metadata: {
-                  id: data.id,
-                  months: data.amount.months,
-                },
-              })
+              },
             })
+          })
 
-            kickChatClient.on('end', () => {
-              if (!didConnect) {
-                // never connected, so don't terminate the connection
-                return
-              }
+          kickChatClient.on('end', () => {
+            if (!didConnect) {
+              // never connected, so don't terminate the connection
+              return
+            }
 
-              ws.terminate()
-            })
-          }
+            ws.terminate()
+          })
         } catch (e) {
           console.error(e)
         }
