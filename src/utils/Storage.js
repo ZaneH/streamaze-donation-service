@@ -44,7 +44,7 @@ const storeDonation = async ({
           metadata,
           months,
           value: {
-            amount,
+            amount: parseInt(amount),
             currency,
           },
         }),
