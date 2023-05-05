@@ -345,6 +345,22 @@ app.ws('/ws', (ws, _req) => {
               })
             })
 
+            kickChatClient.on('kickHost', async ({ data }) => {
+              await storeDonation({
+                streamerId,
+                type: 'kick_host',
+                message: data.optional_message,
+                sender: data.name,
+                amount_in_usd: 0,
+                amount: 0,
+                currency: 'usd',
+                metadata: {
+                  id: data.id,
+                  number_viewers: data.number_viewers,
+                },
+              })
+            })
+
             kickChatClient.on('end', () => {
               if (!didConnect) {
                 // never connected, so don't terminate the connection

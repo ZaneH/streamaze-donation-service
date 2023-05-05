@@ -290,6 +290,22 @@ class KickLiveChat extends EventEmitter {
               },
             },
           })
+        } else if (jsonMsg?.event === 'App\\Events\\StreamHostEvent') {
+          // V2 Kick host
+          const { data } = jsonMsg // data is another json string
+          const jsonData = JSON.parse(data)
+          const { number_viewers, host_username, optional_message } =
+            jsonData || {}
+
+          this.emit('kickHost', {
+            type: 'kickHost',
+            data: {
+              id: Math.floor(Math.random() * 1000000000).toString(),
+              name: host_username,
+              number_viewers,
+              optional_message,
+            },
+          })
         } else {
           console.log('[INFO] Unhandled Kick message', jsonMsg)
         }
