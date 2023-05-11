@@ -234,6 +234,8 @@ class StreamLabsDonation extends EventEmitter {
                     thumbnailUrl = `https://img.youtube.com/vi/${media?.media}/default.jpg`
                   }
 
+                  if (!media?.media) return
+
                   this.emit('streamlabsEvent', {
                     type,
                     data: {
