@@ -208,52 +208,37 @@ class StreamLabsDonation extends EventEmitter {
               const { media } = message || {}
 
               if (mediaEvent === 'play') {
-                // modMoveToNext is a 'skip' action for media shares
-                // it is triggered when the duration ends, or
-                // when a mod clicks the skip button
-                const { modMoveToNext } = message || {}
+                // emit info to play media
+                let youtubeUrl
+                let thumbnailUrl
 
-                if (modMoveToNext === true) {
-                  // TODO: emit info to skip media without storing in DB
-                  // this.emit('streamlabsEvent', {
-                  //   type,
-                  //   data: {
-                  //     action: 'modMoveToNext',
-                  //   },
-                  // })
-                } else {
-                  // emit info to play media
-                  let youtubeUrl
-                  let thumbnailUrl
+                if (media?.media_type === 'youtube') {
+                  youtubeUrl = `https://www.youtube.com/watch?v=${
+                    media?.media
+                  }&t=${media?.start_time ?? 0}`
 
-                  if (media?.media_type === 'youtube') {
-                    youtubeUrl = `https://www.youtube.com/watch?v=${
-                      media?.media
-                    }&t=${media?.start_time ?? 0}`
-
-                    thumbnailUrl = `https://img.youtube.com/vi/${media?.media}/default.jpg`
-                  }
-
-                  if (!media?.media) return
-
-                  this.emit('streamlabsEvent', {
-                    type,
-                    data: {
-                      action: mediaEvent,
-                      action_by: media?.action_by,
-                      donation_id: media?.donation_id ?? media?.id,
-                      media_title: media?.media_title,
-                      media_type: media?.media_type,
-                      media_link: youtubeUrl,
-                      media_thumbnail: thumbnailUrl,
-                      duration: media?.duration,
-                      donation: media?.donation ?? {
-                        amount: 1,
-                        currency: 'usd',
-                      },
-                    },
-                  })
+                  thumbnailUrl = `https://img.youtube.com/vi/${media?.media}/default.jpg`
                 }
+
+                if (!media?.media) return
+
+                this.emit('streamlabsEvent', {
+                  type,
+                  data: {
+                    action: mediaEvent,
+                    action_by: media?.action_by,
+                    donation_id: media?.donation_id ?? media?.id,
+                    media_title: media?.media_title,
+                    media_type: media?.media_type,
+                    media_link: youtubeUrl,
+                    media_thumbnail: thumbnailUrl,
+                    duration: media?.duration,
+                    donation: media?.donation ?? {
+                      amount: 1,
+                      currency: 'usd',
+                    },
+                  },
+                })
               }
               break
             case 'streamlabels.underlying':
