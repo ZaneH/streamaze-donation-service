@@ -8,7 +8,7 @@ const storeDonation = async ({
   message,
   metadata,
   amount,
-  currency,
+  currency = 'usd',
   months,
 }) => {
   try {
