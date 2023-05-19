@@ -13,7 +13,7 @@ class KickLiveChat extends EventEmitter {
     super()
 
     this.chatSocket = new WebSocket(
-      'wss://ws-us2.pusher.com/app/eb1d5f283081a78b932c?protocol=7&client=js&version=7.4.0&flash=false',
+      'wss://ws-us2.pusher.com/app/eb1d5f283081a78b932c?protocol=7&client=js&version=7.6.0&flash=false',
     )
 
     this.channelId = options.channelId
