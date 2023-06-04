@@ -82,7 +82,7 @@ class StreamLabsDonation extends EventEmitter {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            text: exactMessage ? message : `${message?.name} said ${text}`,
+            text: exactMessage ? message : `${senderName} said ${text}`,
           }),
         },
       )
