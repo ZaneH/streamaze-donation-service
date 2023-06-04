@@ -49,6 +49,11 @@ class StreamLabsDonation extends EventEmitter {
       return
     }
 
+    let senderName = message?.name
+    if (senderName?.indexOf('sl_id_') === 0) {
+      senderName = 'Anonymous'
+    }
+
     // TODO: Put this in a TTS module / util
     if (this.ttsService === 'streamlabs') {
       const tts = await fetch('https://streamlabs.com/polly/speak', {
@@ -57,7 +62,7 @@ class StreamLabsDonation extends EventEmitter {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          text: exactMessage ? message : `${message?.name} said ${text}`,
+          text: exactMessage ? message : `${senderName} said ${text}`,
           voice,
         }),
       })
