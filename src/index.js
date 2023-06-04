@@ -45,6 +45,8 @@ app.ws('/ws', (ws, _req) => {
   let tiktokGiftClient
   let kickChatClient
 
+  ws.on('error', console.error)
+
   ws.on('pong', heartbeat)
 
   // Handle incoming messages from the browser
@@ -418,6 +420,7 @@ app.ws('/ws', (ws, _req) => {
     }
 
     console.log('[INFO] Disconnected from client')
+    clearInterval(interval)
   })
 })
 
