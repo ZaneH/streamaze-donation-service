@@ -238,6 +238,7 @@ class StreamLabsDonation extends EventEmitter {
                     media_link: youtubeUrl,
                     media_thumbnail: thumbnailUrl,
                     duration: media?.duration,
+                    start_time: media?.start_time ?? 0,
                     donation: media?.donation ?? {
                       amount: 1,
                       currency: 'usd',

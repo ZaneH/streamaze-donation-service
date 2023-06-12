@@ -198,6 +198,7 @@ app.ws('/ws', (ws, _req) => {
                     media_link: donationData.media_link,
                     media_thumbnail: donationData.media_thumbnail,
                     duration: donationData.duration,
+                    start_time: donationData.start_time,
                   },
                 })
               }
