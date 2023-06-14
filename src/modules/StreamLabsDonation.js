@@ -121,7 +121,7 @@ class StreamLabsDonation extends EventEmitter {
           if (this.slobsSocket) {
             this.slobsSocket.emit('ping')
           } else {
-            print('[INFO] Slobs socket is null')
+            console.log('[INFO] Slobs socket is null')
           }
         }, 25000)
       })
