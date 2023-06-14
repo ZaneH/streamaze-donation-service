@@ -118,7 +118,11 @@ class StreamLabsDonation extends EventEmitter {
         console.log('[INFO] Slobs connected')
 
         this.heartbeat = setInterval(() => {
-          this.slobsSocket.emit('ping')
+          if (this.slobsSocket) {
+            this.slobsSocket.emit('ping')
+          } else {
+            print('[INFO] Slobs socket is null')
+          }
         }, 25000)
       })
 
