@@ -7,16 +7,9 @@ const { getKickChatClient } = require('./modules/KickChat')
 const { updateKV } = require('./modules/Lanyard')
 const express = require('express')
 const enableWs = require('express-ws')
-const {
-  startBroadcast,
-  startServer,
-  stopServer,
-  stopBroadcast,
-} = require('./modules/OBS')
 const cors = require('cors')
-const { stopRPi } = require('./modules/RPi')
-const { oneUSDToBaht } = require('./utils/ExchangeRate')
 const { storeDonation } = require('./utils/Storage')
+const KickViews = require('./modules/KickViews')
 const app = express()
 const wsInstance = enableWs(app)
 
@@ -433,88 +426,6 @@ app.get('/', (_req, res) => {
   return res.send('ok')
 })
 
-app.post('/obs/start-broadcast', async (_req, res) => {
-  const resp = await startBroadcast()
-  if (resp?.error) {
-    return res.status(500).send(resp)
-  }
-
-  return res.send(resp)
-})
-
-app.post('/obs/stop-broadcast', async (_req, res) => {
-  const resp = await stopBroadcast()
-  if (resp?.error) {
-    return res.status(500).send(resp)
-  }
-
-  return res.send(resp)
-})
-
-app.post('/obs/start-server/youtube', async (_req, res) => {
-  const resp = await startServer({
-    isYouTube: true,
-  })
-
-  if (resp?.error) {
-    return res.status(500).send(resp)
-  }
-
-  return res.send(resp)
-})
-
-app.post('/obs/start-server/tiktok', async (_req, res) => {
-  const resp = await startServer({
-    isTikTok: true,
-  })
-
-  if (resp?.error) {
-    return res.status(500).send(resp)
-  }
-
-  return res.send(resp)
-})
-
-app.post('/obs/stop-server', async (_req, res) => {
-  const resp = await stopServer()
-  if (resp?.error) {
-    return res.status(500).send(resp)
-  }
-
-  return res.send(resp)
-})
-
-app.post('/obs/switch-scene', async (req, res) => {
-  if (req.body?.sceneName) {
-    const resp = await switchScene(req.body?.sceneName)
-    if (resp?.error) {
-      return res.status(500).send(resp)
-    }
-
-    return res.send(resp)
-  } else {
-    return res.status(400).send('Missing scene name')
-  }
-})
-
-app.post('/pi/stop', async (_req, res) => {
-  const resp = await stopRPi()
-  if (resp?.error) {
-    return res.status(500).send(resp)
-  }
-
-  return res.send(resp)
-})
-
-app.get('/exchange/baht', async (_req, res) => {
-  const resp = await oneUSDToBaht()
-  if (isNaN(resp)) {
-    return res.status(500).send(resp)
-  }
-
-  return res.send(resp)
-})
-
 /**
  * Update a key/value pair in the KV store for Lanyard
  * method: POST
@@ -538,6 +449,18 @@ app.post('/kv/set', async (req, res) => {
     }
   } else {
     return res.status(400).send('Missing discordUserId, key, value, or apiKey')
+  }
+})
+
+app.get('/kick/viewers/:channelName', async (req, res) => {
+  const { channelName } = req.params
+  try {
+    viewers = await KickViews.getViews(channelName)
+
+    return res.send(JSON.stringify(viewers))
+  } catch (e) {
+    console.error(e)
+    return res.status(500).send('There was an error fetching the viewer count.')
   }
 })
 
