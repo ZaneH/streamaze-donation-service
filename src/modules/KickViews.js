@@ -6,18 +6,14 @@ class KickViews {
   static async getViews(channelName) {
     const browser = await puppeteer.launch({
       headless: 'new',
-      args: [
-        '--disable-gpu',
-        '--disable-dev-shm-usage',
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-      ],
+      args: ['--disable-gpu', '--no-sandbox'],
       protocolTimeout: 60_000,
+      executablePath: '/usr/bin/chromium-browser',
     })
     const page = await browser.newPage()
     await page.goto(`https://www.kick.com/${channelName}`, {
       waitUntil: 'load',
-      timeout: 0,
+      timeout: 420_000,
     })
     await page.waitForXPath('//span[@class="odometer-value"]')
     const allViewValues = await page.$x('//span[@class="odometer-value"]')
