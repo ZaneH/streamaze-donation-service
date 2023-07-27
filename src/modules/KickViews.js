@@ -15,7 +15,10 @@ class KickViews {
       protocolTimeout: 60_000,
     })
     const page = await browser.newPage()
-    await page.goto(`https://www.kick.com/${channelName}`)
+    await page.goto(`https://www.kick.com/${channelName}`, {
+      waitUntil: 'load',
+      timeout: 0,
+    })
     await page.waitForXPath('//span[@class="odometer-value"]')
     const allViewValues = await page.$x('//span[@class="odometer-value"]')
 
