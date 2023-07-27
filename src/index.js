@@ -454,14 +454,12 @@ app.post('/kv/set', async (req, res) => {
 
 app.get('/kick/viewers/:channelName', async (req, res) => {
   const { channelName } = req.params
-  try {
-    viewers = await KickViews.getViews(channelName)
-
-    return res.send(JSON.stringify(viewers))
-  } catch (e) {
-    console.error(e)
-    return res.status(500).send('There was an error fetching the viewer count.')
+  viewersResp = await KickViews.getViews(channelName)
+  if (viewersResp?.error) {
+    return res.status(500).send(viewersResp?.error)
   }
+
+  return res.send(JSON.stringify({ viewers: viewersResp.viewers }))
 })
 
 app.listen(8080, () => {

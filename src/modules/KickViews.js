@@ -10,29 +10,41 @@ class KickViews {
       protocolTimeout: 60_000,
       executablePath: '/usr/bin/chromium-browser',
     })
-    const page = await browser.newPage()
-    await page.goto(`https://www.kick.com/${channelName}`, {
-      waitUntil: 'load',
-      timeout: 420_000,
-    })
-    await page.waitForXPath('//span[@class="odometer-value"]')
-    const allViewValues = await page.$x('//span[@class="odometer-value"]')
 
-    let viewers = ''
-    for (const odometer_value of allViewValues) {
-      const value = await page.evaluate((el) => el.textContent, odometer_value)
-      viewers += value
-    }
+    try {
+      const page = await browser.newPage()
+      await page.goto(`https://www.kick.com/${channelName}`, {
+        waitUntil: 'load',
+        timeout: 420_000,
+      })
 
-    await browser.close()
+      await page.waitForXPath('//span[@class="odometer-value"]')
+      const allViewValues = await page.$x('//span[@class="odometer-value"]')
 
-    if (viewers.length === 0) {
+      let viewers = ''
+      for (const odometer_value of allViewValues) {
+        const value = await page.evaluate(
+          (el) => el.textContent,
+          odometer_value,
+        )
+        viewers += value
+      }
+
+      await browser.close()
+
+      if (viewers.length === 0) {
+        return {
+          error: 'There was an error fetching the viewers for the Kick stream.',
+        }
+      }
+
+      return { viewers }
+    } catch (err) {
+      await browser.close()
       return {
         error: 'There was an error fetching the viewers for the Kick stream.',
       }
     }
-
-    return { viewers }
   }
 }
 
