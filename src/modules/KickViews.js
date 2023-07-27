@@ -8,7 +8,7 @@ class KickViews {
       headless: 'new',
       args: ['--disable-gpu', '--no-sandbox'],
       protocolTimeout: 60_000,
-      executablePath: '/usr/bin/chromium-browser',
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
     })
 
     try {
