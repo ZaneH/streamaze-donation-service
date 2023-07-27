@@ -12,6 +12,7 @@ class KickViews {
         '--no-sandbox',
         '--disable-setuid-sandbox',
       ],
+      protocolTimeout: 60_000,
     })
     const page = await browser.newPage()
     await page.goto(`https://www.kick.com/${channelName}`)
