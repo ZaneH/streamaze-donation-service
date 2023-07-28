@@ -20,14 +20,14 @@ function heartbeat() {
 }
 
 const pingInterval = setInterval(function ping() {
-  wsInstance.getWss().clients.forEach(function each(ws) {
-    console.log('Testing conn')
+  const clients = wsInstance.getWss().clients
+  console.log('[HB] Active connections: ' + clients.size)
+
+  clients.forEach(function each(ws) {
     if (ws.isAlive === false) {
-      console.log('killing conn')
       return ws.terminate()
     }
 
-    console.log('pinging conn')
     ws.isAlive = false
     ws.ping()
   })
@@ -428,10 +428,6 @@ wsInstance.getWss().on('close', function close() {
 
 app.get('/', (_req, res) => {
   return res.send('ok')
-})
-
-app.get('/boop', (_req, res) => {
-  return res.send(JSON.stringify({ viewers: 69 }))
 })
 
 /**
