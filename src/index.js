@@ -19,10 +19,15 @@ function heartbeat() {
   this.isAlive = true
 }
 
-const interval = setInterval(function ping() {
+const pingInterval = setInterval(function ping() {
   wsInstance.getWss().clients.forEach(function each(ws) {
-    if (ws.isAlive === false) return ws.terminate()
+    console.log('Testing conn')
+    if (ws.isAlive === false) {
+      console.log('killing conn')
+      return ws.terminate()
+    }
 
+    console.log('pinging conn')
     ws.isAlive = false
     ws.ping()
   })
@@ -414,12 +419,11 @@ app.ws('/ws', (ws, _req) => {
     }
 
     console.log('[INFO] Disconnected from client')
-    clearInterval(interval)
   })
 })
 
 wsInstance.getWss().on('close', function close() {
-  clearInterval(interval)
+  clearInterval(pingInterval)
 })
 
 app.get('/', (_req, res) => {
@@ -454,7 +458,7 @@ app.post('/kv/set', async (req, res) => {
 
 app.get('/kick/viewers/:channelName', async (req, res) => {
   const { channelName } = req.params
-  viewersResp = await KickViews.getViews(channelName)
+  const viewersResp = await KickViews.getViews(channelName)
   if (viewersResp?.error) {
     return res.status(500).send(viewersResp?.error)
   }
