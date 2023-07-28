@@ -4,14 +4,15 @@ puppeteer.use(StealthPlugin())
 
 class KickViews {
   static async getViews(channelName) {
-    const browser = await puppeteer.launch({
-      headless: 'new',
-      args: ['--disable-gpu', '--no-sandbox'],
-      protocolTimeout: 60_000,
-      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
-    })
-
+    let browser
     try {
+      browser = await puppeteer.launch({
+        headless: 'new',
+        args: ['--disable-gpu', '--no-sandbox'],
+        protocolTimeout: 60_000,
+        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
+      })
+
       const page = await browser.newPage()
       await page.goto(`https://www.kick.com/${channelName}`, {
         waitUntil: 'load',
@@ -40,7 +41,10 @@ class KickViews {
 
       return { viewers }
     } catch (err) {
-      await browser.close()
+      if (browser) {
+        await browser.close()
+      }
+
       return {
         error: 'There was an error fetching the viewers for the Kick stream.',
       }
