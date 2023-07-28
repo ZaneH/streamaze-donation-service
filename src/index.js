@@ -430,6 +430,10 @@ app.get('/', (_req, res) => {
   return res.send('ok')
 })
 
+app.get('/boop', (_req, res) => {
+  return res.send(JSON.stringify({ viewers: 69 }))
+})
+
 /**
  * Update a key/value pair in the KV store for Lanyard
  * method: POST
