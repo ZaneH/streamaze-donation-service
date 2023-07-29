@@ -21,7 +21,7 @@ function heartbeat() {
 
 const pingInterval = setInterval(function ping() {
   const clients = wsInstance.getWss().clients
-  console.log('[HB] Active connections: ' + clients.size)
+  console.log('<3\tActive connections: ' + clients.size)
 
   clients.forEach(function each(ws) {
     if (ws.isAlive === false) {
@@ -36,6 +36,12 @@ const pingInterval = setInterval(function ping() {
 app.use(cors())
 app.use(express.json())
 
+wsInstance.getWss().on('connection', function connection(ws) {
+  ws.isAlive = true
+  ws.on('error', console.error)
+  ws.on('pong', heartbeat)
+})
+
 app.ws('/ws', (ws, _req) => {
   let tiktokChatClient
   let youtubeChatClient
@@ -43,14 +49,9 @@ app.ws('/ws', (ws, _req) => {
   let tiktokGiftClient
   let kickChatClient
 
-  ws.on('error', console.error)
-
-  ws.on('pong', heartbeat)
-
   // Handle incoming messages from the browser
   ws.on('message', async (message) => {
-    if (ws.isAlive) return
-    ws.isAlive = true
+    if (ws.hasMessaged) return
 
     let payload
     let streamerId // for assigning donations to a streamer
@@ -380,6 +381,8 @@ app.ws('/ws', (ws, _req) => {
       ws.close(1011, 'Invalid request')
       return
     }
+
+    ws.hasMessaged = true
   })
 
   ws.on('close', () => {
@@ -419,6 +422,7 @@ app.ws('/ws', (ws, _req) => {
     }
 
     console.log('[INFO] Disconnected from client')
+    ws.hasMessaged = false
   })
 })
 
