@@ -7,7 +7,10 @@ const streamlabsDonationClients = new Map()
 
 async function getStreamlabsDonationClient(streamToken, streamazeKey, options) {
   if (streamlabsDonationClients.has(streamToken)) {
-    return streamlabsDonationClients.get(streamToken)
+    const foundClient = streamlabsDonationClients.get(streamToken)
+    if (foundClient) {
+      return foundClient
+    }
   }
 
   const client = new StreamLabsDonation(streamToken, streamazeKey, options)
@@ -121,7 +124,8 @@ class StreamLabsDonation extends EventEmitter {
           if (this.slobsSocket) {
             this.slobsSocket.emit('ping')
           } else {
-            console.log('[INFO] Slobs socket is null')
+            console.log('[INFO] Slobs socket is null, closing...')
+            this.close()
           }
         }, 25000)
       })
@@ -281,11 +285,7 @@ class StreamLabsDonation extends EventEmitter {
   close() {
     if (this.connectedClients > 1) {
       this.connectedClients--
-      return true
-    }
-
-    if (!this.slobsSocket) {
-      return true
+      return true // true means we won't remove listeners yet
     }
 
     if (streamlabsDonationClients.has(this.streamToken)) {
