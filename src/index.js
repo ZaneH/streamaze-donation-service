@@ -4,6 +4,7 @@ const { getTiktokGiftClient } = require('./modules/TikTokGift')
 const { getTiktokChatClient } = require('./modules/TikTokChat')
 const { getYoutubeChatClient } = require('./modules/YouTubeChat')
 const { getKickChatClient } = require('./modules/KickChat')
+const { getTwitchChatClient } = require('./modules/TwitchChat')
 const { updateKV } = require('./modules/Lanyard')
 const express = require('express')
 const enableWs = require('express-ws')
@@ -48,6 +49,7 @@ app.ws('/ws', (ws, _req) => {
   let slobsDonationClient
   let tiktokGiftClient
   let kickChatClient
+  let twitchChatClient
 
   // Handle incoming messages from the browser
   ws.on('message', async (message) => {
@@ -65,6 +67,7 @@ app.ws('/ws', (ws, _req) => {
     let kickChannelId // for Kick chat
     let kickChatroomId // for Kick chat
     let kickChannelName // for Kick chat
+    let twitchChannelName // for Twitch chat
 
     try {
       payload = JSON.parse(message)
@@ -80,6 +83,7 @@ app.ws('/ws', (ws, _req) => {
       kickChannelId = payload?.kickChannelId
       kickChatroomId = payload?.kickChatroomId
       kickChannelName = payload?.kickChannelName
+      twitchChannelName = payload?.twitchChannelName
 
       if (streamToken && streamerId) {
         try {
@@ -376,6 +380,34 @@ app.ws('/ws', (ws, _req) => {
           console.error(e)
         }
       }
+
+      if (twitchChannelName) {
+        try {
+          twitchChatClient = await getTwitchChatClient(twitchChannelName)
+          twitchChatClient.connectedClients++
+          didConnect = false
+
+          twitchChatClient.on('connected', () => {
+            didConnect = true
+          })
+
+          twitchChatClient.on('twitchChat', (data) => {
+            // console.log('Twitch', JSON.stringify(data))
+            ws.send(JSON.stringify(data))
+          })
+
+          twitchChatClient.on('end', () => {
+            if (!didConnect) {
+              // never connected, so don't terminate the connection
+              return
+            }
+
+            ws.terminate()
+          })
+        } catch (e) {
+          console.error(e)
+        }
+      }
     } catch (e) {
       console.log('[ERROR] Invalid request', e)
       ws.close(1011, 'Invalid request')
@@ -418,6 +450,13 @@ app.ws('/ws', (ws, _req) => {
       const hasListeners = kickChatClient.close()
       if (!hasListeners) {
         kickChatClient.removeAllListeners()
+      }
+    }
+
+    if (twitchChatClient) {
+      const hasListeners = twitchChatClient.close()
+      if (!hasListeners) {
+        twitchChatClient.removeAllListeners()
       }
     }
 
