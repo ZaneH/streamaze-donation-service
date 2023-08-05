@@ -23,6 +23,7 @@ class KickIds {
       await cdp.send('Page.enable')
 
       const idsPromise = new Promise((resolve, reject) => {
+        let timeout
         const receivedIds = {
           channel: null,
           chatrooms: null,
@@ -31,7 +32,7 @@ class KickIds {
         async function checkAndResolve() {
           if (receivedIds.channel !== null && receivedIds.chatrooms !== null) {
             console.log(`[INFO] Resolved IDs for ${channelName}`)
-            await browser.close()
+            clearTimeout(timeout)
             resolve(receivedIds)
           }
         }
@@ -55,9 +56,8 @@ class KickIds {
           }
         })
 
-        setTimeout(async () => {
+        timeout = setTimeout(async () => {
           console.log(`[INFO] Kick ID request timed out for ${channelName}`)
-          await browser.close()
           reject('Request timed out. Check the channel name and try again.')
         }, 15000)
       })
@@ -67,14 +67,16 @@ class KickIds {
         timeout: 420_000,
       })
 
-      return idsPromise
+      const returnValue = await idsPromise
+      await browser.close()
+      return returnValue
     } catch (err) {
       console.error(err)
       if (browser) {
         await browser.close()
       }
 
-      return
+      throw err
     }
   }
 }
