@@ -11,6 +11,7 @@ const enableWs = require('express-ws')
 const cors = require('cors')
 const { storeDonation } = require('./utils/Storage')
 const KickViews = require('./modules/KickViews')
+const { KickIds } = require('./modules/KickIds')
 const app = express()
 const wsInstance = enableWs(app)
 
@@ -507,6 +508,13 @@ app.get('/kick/viewers/:channelName', async (req, res) => {
   }
 
   return res.send(JSON.stringify({ viewers: viewersResp.viewers }))
+})
+
+app.post('/kick/ids/:channelName', async (req, res) => {
+  const { channelName } = req.params
+  const idsResp = await KickIds.getKickIds(channelName)
+
+  return res.send(JSON.stringify({ ids: idsResp }))
 })
 
 app.listen(8080, () => {
