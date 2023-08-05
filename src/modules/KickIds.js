@@ -30,6 +30,7 @@ class KickIds {
 
         function checkAndResolve() {
           if (receivedIds.channel !== null && receivedIds.chatrooms !== null) {
+            console.log(`[INFO] Resolved IDs for ${channelName}`)
             resolve(receivedIds)
           }
         }
