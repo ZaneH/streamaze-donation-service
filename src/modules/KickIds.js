@@ -55,7 +55,8 @@ class KickIds {
         })
 
         setTimeout(() => {
-          reject(new Error('Timeout'))
+          console.log(`[INFO] Kick ID request timed out for ${channelName}`)
+          reject('Request timed out. Check the channel name and try again.')
         }, 15000)
       })
 

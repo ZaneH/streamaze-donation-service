@@ -512,9 +512,13 @@ app.get('/kick/viewers/:channelName', async (req, res) => {
 
 app.post('/kick/ids/:channelName', async (req, res) => {
   const { channelName } = req.params
-  const idsResp = await KickIds.getKickIds(channelName)
+  try {
+    const idsResp = await KickIds.getKickIds(channelName)
 
-  return res.send(JSON.stringify({ ids: idsResp }))
+    return res.send(JSON.stringify({ ids: idsResp }))
+  } catch (e) {
+    return res.status(500).send(e)
+  }
 })
 
 app.listen(8080, () => {
