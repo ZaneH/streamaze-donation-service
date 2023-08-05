@@ -28,9 +28,10 @@ class KickIds {
           chatrooms: null,
         }
 
-        function checkAndResolve() {
+        async function checkAndResolve() {
           if (receivedIds.channel !== null && receivedIds.chatrooms !== null) {
             console.log(`[INFO] Resolved IDs for ${channelName}`)
+            await browser.close()
             resolve(receivedIds)
           }
         }
@@ -54,8 +55,9 @@ class KickIds {
           }
         })
 
-        setTimeout(() => {
+        setTimeout(async () => {
           console.log(`[INFO] Kick ID request timed out for ${channelName}`)
+          await browser.close()
           reject('Request timed out. Check the channel name and try again.')
         }, 15000)
       })
@@ -68,6 +70,10 @@ class KickIds {
       return idsPromise
     } catch (err) {
       console.error(err)
+      if (browser) {
+        await browser.close()
+      }
+
       return
     }
   }
