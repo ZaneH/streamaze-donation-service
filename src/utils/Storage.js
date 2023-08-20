@@ -10,6 +10,7 @@ const storeDonation = async ({
   amount,
   currency = 'usd',
   months,
+  excludeFromProfits = false,
 }) => {
   try {
     let amountInUSD = amount_in_usd
@@ -43,6 +44,7 @@ const storeDonation = async ({
           message,
           metadata,
           months,
+          exclude_from_profit: excludeFromProfits,
           value: {
             amount: parseInt(amount),
             currency,

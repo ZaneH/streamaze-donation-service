@@ -51,27 +51,29 @@ app.ws('/ws', (ws, _req) => {
   let tiktokGiftClient
   let kickChatClient
   let twitchChatClient
+  let excludeFromProfits = false // update profit in Lanyard?
 
   // Handle incoming messages from the browser
   ws.on('message', async (message) => {
-    if (ws.hasMessaged) return
-
     let payload
-    let streamerId // for assigning donations to a streamer
-    let tiktokChatUsername // for TikTok chat
-    let youtubeChatUrl // for YouTube chat
-    let streamToken // for StreamLabs donations
-    let ttsService // for TTS
-    let streamazeKey // for TTS right now
-    // let streamlabsVoice // for StreamLabs TTS
-    let tiktokDonoUsername // for TikTok gifts
-    let kickChannelId // for Kick chat
-    let kickChatroomId // for Kick chat
-    let kickChannelName // for Kick chat
-    let twitchChannelName // for Twitch chat
-
     try {
       payload = JSON.parse(message)
+      excludeFromProfits = payload?.excludeFromProfits
+
+      if (ws.hasMessaged) return
+
+      let streamerId // for assigning donations to a streamer
+      let tiktokChatUsername // for TikTok chat
+      let youtubeChatUrl // for YouTube chat
+      let streamToken // for StreamLabs donations
+      let ttsService // for TTS
+      let streamazeKey // for TTS right now
+      // let streamlabsVoice // for StreamLabs TTS
+      let tiktokDonoUsername // for TikTok gifts
+      let kickChannelId // for Kick chat
+      let kickChatroomId // for Kick chat
+      let kickChannelName // for Kick chat
+      let twitchChannelName // for Twitch chat
 
       streamerId = payload?.streamerId
       tiktokChatUsername = payload?.tiktokChat
@@ -120,6 +122,7 @@ app.ws('/ws', (ws, _req) => {
               const donationType = data?.type
               if (donationType === 'superchat') {
                 await storeDonation({
+                  excludeFromProfits,
                   streamerId,
                   type: donationType,
                   sender: donationData.name,
@@ -136,6 +139,7 @@ app.ws('/ws', (ws, _req) => {
                 })
               } else if (donationType === 'subscription') {
                 await storeDonation({
+                  excludeFromProfits,
                   streamerId,
                   type: donationType,
                   sender: donationData.name,
@@ -154,6 +158,7 @@ app.ws('/ws', (ws, _req) => {
                 })
               } else if (donationType === 'donation') {
                 await storeDonation({
+                  excludeFromProfits,
                   streamerId,
                   type: donationType,
                   sender: donationData.name,
@@ -170,6 +175,7 @@ app.ws('/ws', (ws, _req) => {
                 })
               } else if (donationType === 'membershipGift') {
                 await storeDonation({
+                  excludeFromProfits,
                   streamerId,
                   type: donationType,
                   sender: donationData.name,
@@ -187,6 +193,7 @@ app.ws('/ws', (ws, _req) => {
                 })
               } else if (donationType === 'mediaShareEvent') {
                 await storeDonation({
+                  excludeFromProfits,
                   streamerId,
                   type: 'streamlabs_media',
                   sender: donationData.action_by,
@@ -319,6 +326,7 @@ app.ws('/ws', (ws, _req) => {
 
             kickChatClient.on('kickSub', async ({ data }) => {
               await storeDonation({
+                excludeFromProfits,
                 streamerId,
                 type: 'kick_subscription',
                 sender: data.name,
@@ -338,6 +346,7 @@ app.ws('/ws', (ws, _req) => {
               console.log('Debug info', data)
 
               await storeDonation({
+                excludeFromProfits,
                 streamerId,
                 type: 'kick_gifted_subscription',
                 sender: data.name,
@@ -354,6 +363,7 @@ app.ws('/ws', (ws, _req) => {
 
             kickChatClient.on('kickHost', async ({ data }) => {
               await storeDonation({
+                excludeFromProfits,
                 streamerId,
                 type: 'kick_host',
                 message: data.optional_message,
