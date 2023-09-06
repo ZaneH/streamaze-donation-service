@@ -93,8 +93,6 @@ app.ws('/ws', (ws, _req) => {
       kickChannelName = payload?.kickChannelName
       twitchChannelName = payload?.twitchChannelName
 
-      spikeWatcher.resetUser(streamerId)
-
       if (streamToken && streamerId) {
         try {
           // Alias for Sam's key
