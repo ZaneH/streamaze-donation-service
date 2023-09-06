@@ -4,8 +4,8 @@ class SpikeWatch extends EventEmitter {
   constructor() {
     super()
 
-    // Stores the rolling average of the last 4 segments
-    this.rollingAverage = {}
+    // Stores the previous rolling average for each user
+    this.lastRollingAverage = {}
     // Stores the value of the last 4 segments of the rolling average
     this.lastFourSegments = {}
     // Determines the threshold for a spike
@@ -17,7 +17,7 @@ class SpikeWatch extends EventEmitter {
   }
 
   resetUser(id) {
-    this.rollingAverage[id] = 0
+    this.lastRollingAverage[id] = 0
     delete this.lastFourSegments[id]
   }
 
@@ -36,7 +36,7 @@ class SpikeWatch extends EventEmitter {
       }
 
       // Update the rolling average
-      this.rollingAverage[id] = rAvg
+      this.lastRollingAverage[id] = rAvg
 
       // Shift the data
       if (this.lastFourSegments[id].length === 4) {
@@ -68,8 +68,8 @@ class SpikeWatch extends EventEmitter {
   }
 
   getRollingAverage(id) {
-    // 1. Get the sum of the last 4 segments
-    const lastFourSegments = this.lastFourSegments[id]
+    // 1. Get the sum of the first 3 segments
+    const lastFourSegments = this.lastFourSegments[id].slice(0, 3)
     const sum = lastFourSegments.reduce((a, b) => a + b, 0)
     // 2. Divide the sum by the number of segments
     const average = sum / lastFourSegments.length
@@ -81,14 +81,15 @@ class SpikeWatch extends EventEmitter {
       return false // Not enough data
     }
 
-    if (!this.rollingAverage[id]) {
+    if (!this.lastRollingAverage[id]) {
       console.log(`No rolling average for user ${id}`)
       return false
     }
 
     // Calculate the percentage difference between the new and previous rolling averages
     const percentageDifference =
-      (newRollingAverage - this.rollingAverage[id]) / this.rollingAverage[id]
+      (newRollingAverage - this.lastRollingAverage[id]) /
+      this.lastRollingAverage[id]
 
     // Check if the percentage difference exceeds the threshold
     if (percentageDifference > this.threshold) {

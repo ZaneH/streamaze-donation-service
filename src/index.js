@@ -544,7 +544,7 @@ app.listen(8080, () => {
   console.log('Websocket is running on :8080/ws')
 })
 
-spikeWatcher.on('spike', async (id, rAvg) => {
+spikeWatcher.on('spike', async (_id, rAvg) => {
   // TODO: Fix this for other streamers
   const resp = await fetch(
     `https://api.hop.io/v1/channels/${process.env.HOP_CHANNEL}/state`,
@@ -579,7 +579,9 @@ spikeWatcher.on('spike', async (id, rAvg) => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            message: `Spike detected.\n**Current rolling average:** ${rAvg} messages in 5 minutes.\nStream time: ${uptime}`,
+            message: `Spike detected.\n**Rolling average:** ${rAvg.toFixed(
+              2,
+            )} messages in 5 minutes.\nStream time: ${uptime}`,
           }),
         },
       )
