@@ -579,7 +579,7 @@ spikeWatcher.on('spike', async (id, rAvg) => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            message: `Spike detected.\n**Average:** ${rAvg} messages per minute.\nStream uptime: ${uptime}`,
+            message: `Spike detected.\n**Current rolling average:** ${rAvg} messages in 5 minutes.\nStream time: ${uptime}`,
           }),
         },
       )
