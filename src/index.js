@@ -584,7 +584,7 @@ spikeWatcher.on('spike', async (_id, rAvg) => {
           body: JSON.stringify({
             message: `Spike detected.\n**Rolling average:** ${rAvg.toFixed(
               2,
-            )} messages in 5 minutes.\nStream time: ${uptime}`,
+            )} messages in 2 minutes.\nStream time: ${uptime}`,
           }),
         },
       )
