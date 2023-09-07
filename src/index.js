@@ -14,6 +14,7 @@ const { storeDonation } = require('./utils/Storage')
 const KickViews = require('./modules/KickViews')
 const { KickIds } = require('./modules/KickIds')
 const fetch = require('node-fetch')
+const { secondsToHHMMSS } = require('./utils/Time')
 const app = express()
 const wsInstance = enableWs(app)
 const spikeWatcher = new SpikeWatch()
@@ -567,6 +568,8 @@ spikeWatcher.on('spike', async (_id, rAvg) => {
         month: 'long',
       })} ${now.getDate()}, ${now.toLocaleTimeString('en-US')}`
       uptime = formattedDate
+    } else {
+      uptime = secondsToHHMMSS(uptime)
     }
 
     if (!!uptime) {
