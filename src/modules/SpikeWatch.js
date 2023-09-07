@@ -9,9 +9,9 @@ class SpikeWatch extends EventEmitter {
     // Stores the value of the last 4 segments of the rolling average
     this.lastFourSegments = {}
     // Determines the threshold for a spike
-    this.threshold = 0.25
+    this.threshold = 0.1
     // The duration of a segment in milliseconds
-    this.segmentDuration = 5 * 60 * 1000 // 5 minutes
+    this.segmentDuration = 2 * 60 * 1000 // 5 minutes
     // The time at which the current segment started
     this.segmentStartTime = 0
   }
