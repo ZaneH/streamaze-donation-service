@@ -573,26 +573,30 @@ spikeWatcher.on('spike', async (_id, rAvg) => {
     }
 
     if (!!uptime) {
-      // send webhook to Discord bot
-      const resp = await fetch(
-        `${process.env.DISCORD_BOT_WEBHOOK_URL}/webhook/highlight/1149067197210185748`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
+      try {
+        // send webhook to Discord bot
+        const resp = await fetch(
+          `${process.env.DISCORD_BOT_WEBHOOK_URL}/webhook/highlight/1149067197210185748`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              message: `Spike detected.\n**Rolling average:** ${rAvg.toFixed(
+                2,
+              )} messages in 2 minutes.\nStream time: ${uptime}`,
+            }),
           },
-          body: JSON.stringify({
-            message: `Spike detected.\n**Rolling average:** ${rAvg.toFixed(
-              2,
-            )} messages in 2 minutes.\nStream time: ${uptime}`,
-          }),
-        },
-      )
+        )
 
-      if (resp.status === 200) {
-        console.log('Sent webhook to Discord bot')
-      } else {
-        console.error('Failed to send webhook to Discord bot')
+        if (resp.status === 200) {
+          console.log('Sent webhook to Discord bot')
+        } else {
+          console.error('Failed to send webhook to Discord bot')
+        }
+      } catch (e) {
+        console.error(e)
       }
     }
   } else {
