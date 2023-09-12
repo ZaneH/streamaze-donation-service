@@ -15,6 +15,7 @@ const KickViews = require('./modules/KickViews')
 const { KickIds } = require('./modules/KickIds')
 const fetch = require('node-fetch')
 const { secondsToHHMMSS } = require('./utils/Time')
+const { Hop } = require('@onehop/js')
 const app = express()
 const wsInstance = enableWs(app)
 const spikeWatcher = new SpikeWatch()
@@ -22,6 +23,7 @@ const spikeWatcher = new SpikeWatch()
 require('dotenv').config()
 
 const HOP_TOKEN = process.env.HOP_TOKEN
+const hop = new Hop(HOP_TOKEN)
 
 function heartbeat() {
   this.isAlive = true
@@ -537,6 +539,20 @@ app.post('/kick/ids/:channelName', async (req, res) => {
     return res.send(JSON.stringify({ ids: idsResp }))
   } catch (e) {
     return res.status(500).send(e)
+  }
+})
+
+app.post('/wifi/scan', async (req, res) => {
+  try {
+    await hop.channels.publishMessage(
+      process.env.HOP_CHANNEL,
+      'SSID_RESCAN',
+      {},
+    )
+
+    return res.send('ok')
+  } catch (e) {
+    return res.sendStatus(500)
   }
 })
 
