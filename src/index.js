@@ -506,8 +506,8 @@ app.get('/', (_req, res) => {
  * }
  */
 app.post('/kv/set', async (req, res) => {
-  const { discordUserId, key, value, apiKey } = req.body
-  if (discordUserId && key && value && apiKey) {
+  const { discordUserId, key, value, apiKey } = req.body || {}
+  if (discordUserId && key && apiKey) {
     try {
       const resp = await updateKV(discordUserId, key, value, apiKey)
 
@@ -517,7 +517,7 @@ app.post('/kv/set', async (req, res) => {
       return res.status(500).send(e)
     }
   } else {
-    return res.status(400).send('Missing discordUserId, key, value, or apiKey')
+    return res.status(400).send('Missing discordUserId, key, or apiKey')
   }
 })
 
