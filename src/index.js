@@ -552,6 +552,24 @@ app.post('/wifi/scan', async (req, res) => {
 
     return res.send('ok')
   } catch (e) {
+    console.error(e)
+    return res.sendStatus(500)
+  }
+})
+
+app.post('/wifi/connect', async (req, res) => {
+  const { ssid, password } = req.body || {}
+  try {
+    await hop.channels.publishMessage(
+      process.env.HOP_CHANNEL,
+      'SSSID_CONNECT',
+      {
+        ssid,
+        password,
+      },
+    )
+  } catch (e) {
+    console.error(e)
     return res.sendStatus(500)
   }
 })
