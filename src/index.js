@@ -645,7 +645,7 @@ const onSpike = async (_id, rAvg, streamerId) => {
       try {
         // send webhook to Discord bot
         const resp = await fetch(
-          `${process.env.DISCORD_BOT_WEBHOOK_URL}/webhook/highlight/976623220759339058`,
+          `${process.env.DISCORD_BOT_WEBHOOK_URL}/webhook/highlight/${process.env.DISCORD_HIGHLIGHT_CHANNEL}`,
           {
             method: 'POST',
             headers: {
