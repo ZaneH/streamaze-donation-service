@@ -129,7 +129,11 @@ class KickLiveChat extends EventEmitter {
           // V2 Kick gifted subs
           const { data } = jsonMsg // data is another json string
           const jsonData = JSON.parse(data)
-          const { gifted_usernames, gifter_username } = jsonData
+          const {
+            gifted_usernames,
+            gifter_username,
+            chatroom_id: chatroomId,
+          } = jsonData
 
           const amountOfSubs = gifted_usernames.length
           const displayString = `just gifted ${amountOfSubs} sub${
@@ -146,6 +150,7 @@ class KickLiveChat extends EventEmitter {
               amount: {
                 months: amountOfSubs,
               },
+              chatroomId,
             },
           })
         } else if (jsonMsg?.event === 'pusher:connection_established') {
@@ -160,7 +165,13 @@ class KickLiveChat extends EventEmitter {
           // V2 Kick messages
           const { data } = jsonMsg // data is another json string
           const jsonData = JSON.parse(data)
-          const { id: msgId, sender, content, type } = jsonData
+          const {
+            id: msgId,
+            sender,
+            content,
+            type,
+            chatroom_id: chatroomId,
+          } = jsonData
           const { username, identity } = sender
           const { badges: fullBadges } = identity
           const badges = fullBadges.map((badge) => badge.type)
@@ -187,12 +198,13 @@ class KickLiveChat extends EventEmitter {
             emotes: uniqueEmoji,
             badges,
             metadata,
+            chatroomId,
           })
         } else if (jsonMsg?.event === 'App\\Events\\SubscriptionEvent') {
           // V2 Kick sub
           const { data } = jsonMsg // data is another json string
           const jsonData = JSON.parse(data)
-          const { months } = jsonData
+          const { months, chatroom_id: chatroomId } = jsonData
 
           this.emit('kickSub', {
             type: 'kickSub',
@@ -203,14 +215,19 @@ class KickLiveChat extends EventEmitter {
               amount: {
                 months,
               },
+              chatroomId,
             },
           })
         } else if (jsonMsg?.event === 'App\\Events\\StreamHostEvent') {
           // V2 Kick host
           const { data } = jsonMsg // data is another json string
           const jsonData = JSON.parse(data)
-          const { number_viewers, host_username, optional_message } =
-            jsonData || {}
+          const {
+            number_viewers,
+            host_username,
+            optional_message,
+            chatroom_id: chatroomId,
+          } = jsonData || {}
 
           this.emit('kickHost', {
             type: 'kickHost',
@@ -219,6 +236,7 @@ class KickLiveChat extends EventEmitter {
               name: host_username,
               number_viewers,
               optional_message,
+              chatroomId,
             },
           })
         } else {
@@ -243,7 +261,6 @@ class KickLiveChat extends EventEmitter {
     // .chatroom.channel_id
 
     const { channelId, chatroomId } = chatOptions
-
     try {
       // Send message to WS:
       // {"event": "pusher:subscribe","data": {"auth": "","channel": "channel.<channel_id>"}}
@@ -269,14 +286,16 @@ class KickLiveChat extends EventEmitter {
       )
 
       // TODO: This doesn't need to be 30s, it can be larger
-      this.heartbeat = setInterval(() => {
-        this.chatSocket.send(
-          JSON.stringify({
-            event: 'pusher:ping',
-            data: {},
-          }),
-        )
-      }, 30000)
+      if (!this.heartbeat) {
+        this.heartbeat = setInterval(() => {
+          this.chatSocket.send(
+            JSON.stringify({
+              event: 'pusher:ping',
+              data: {},
+            }),
+          )
+        }, 30000)
+      }
     } catch (err) {
       console.log(err)
       this.emit('end')

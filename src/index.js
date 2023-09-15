@@ -66,6 +66,19 @@ app.ws('/ws', (ws, _req) => {
     let payload
     try {
       payload = JSON.parse(message)
+
+      // additional chat source payload
+      if (payload?.addChannelId && payload?.addChatroomId) {
+        if (kickChatClient) {
+          kickChatClient.addChatSource({
+            channelId: payload.addChannelId,
+            chatroomId: payload.addChatroomId,
+          })
+        }
+
+        return
+      }
+
       excludeFromProfits = payload?.excludeFromProfits
 
       if (ws.hasMessaged) return

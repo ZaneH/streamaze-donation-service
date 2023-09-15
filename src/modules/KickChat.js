@@ -38,6 +38,7 @@ class KickChat extends EventEmitter {
     this.channelName = options.kickChannelName
     this.kickClient = null
     this.connectedClients = 0
+    this.additionalChatSourceChannelIds = []
   }
 
   async connect() {
@@ -69,23 +70,46 @@ class KickChat extends EventEmitter {
     })
 
     this.kickClient.on('message', (data) => {
+      console.log(data)
       this.emit('kickChat', data)
     })
 
     this.kickClient.on('kickSub', (data) => {
-      this.emit('kickSub', data)
+      if (data.chatroomId === this.chatroomId) {
+        this.emit('kickSub', data)
+      }
     })
 
     this.kickClient.on('kickGiftedSub', (data) => {
-      this.emit('kickGiftedSub', data)
+      if (data.chatroomId === this.chatroomId) {
+        this.emit('kickGiftedSub', data)
+      }
     })
 
     this.kickClient.on('kickHost', (data) => {
-      this.emit('kickHost', data)
+      if (data.chatroomId === this.chatroomId) {
+        this.emit('kickHost', data)
+      }
     })
 
     this.kickClient.on('end', () => {
       this.emit('end')
+    })
+  }
+
+  async addChatSource({ channelId, chatroomId }) {
+    if (!this.kickClient) {
+      return
+    }
+
+    if (this.additionalChatSourceChannelIds.includes(channelId)) {
+      return
+    }
+
+    this.additionalChatSourceChannelIds.push(channelId)
+    await this.kickClient._connect_chat({
+      channelId,
+      chatroomId,
     })
   }
 
