@@ -68,7 +68,15 @@ app.ws('/ws', (ws, _req) => {
       payload = JSON.parse(message)
 
       // additional chat source payload
-      if (payload?.addChannelId && payload?.addChatroomId) {
+      if (
+        payload?.addChannelId &&
+        payload?.addChatroomId &&
+        payload?.kickChannelName
+      ) {
+        kickChatClient = await getKickChatClient({
+          kickChannelName: payload.kickChannelName,
+        })
+
         if (kickChatClient) {
           kickChatClient.addChatSource({
             channelId: payload.addChannelId,

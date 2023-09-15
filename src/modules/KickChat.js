@@ -70,7 +70,6 @@ class KickChat extends EventEmitter {
     })
 
     this.kickClient.on('message', (data) => {
-      console.log(data)
       this.emit('kickChat', data)
     })
 
