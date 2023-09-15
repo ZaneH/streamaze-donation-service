@@ -1,7 +1,7 @@
 const { EventEmitter } = require('stream')
 
 class SpikeWatch extends EventEmitter {
-  constructor() {
+  constructor(_streamerId) {
     super()
 
     // Stores the previous rolling average for each user
@@ -11,9 +11,10 @@ class SpikeWatch extends EventEmitter {
     // Determines the threshold for a spike
     this.threshold = 0.1
     // The duration of a segment in milliseconds
-    this.segmentDuration = 2 * 60 * 1000 // 5 minutes
+    this.segmentDuration = 5 * 60 * 1000 // X minutes
     // The time at which the current segment started
     this.segmentStartTime = 0
+    this.streamerId = _streamerId?.toString()
   }
 
   resetUser(id) {
@@ -32,7 +33,7 @@ class SpikeWatch extends EventEmitter {
       const isSpike = this.isSpike(id, rAvg)
 
       if (isSpike) {
-        this.emit('spike', id, rAvg)
+        this.emit('spike', id, rAvg, this.streamerId)
       }
 
       // Update the rolling average

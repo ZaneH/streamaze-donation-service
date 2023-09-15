@@ -18,7 +18,6 @@ const { secondsToHHMMSS } = require('./utils/Time')
 const { Hop } = require('@onehop/js')
 const app = express()
 const wsInstance = enableWs(app)
-const spikeWatcher = new SpikeWatch()
 
 require('dotenv').config()
 
@@ -51,6 +50,12 @@ wsInstance.getWss().on('connection', function connection(ws) {
   ws.on('error', console.error)
   ws.on('pong', heartbeat)
 })
+
+function sendMessageToSpikeWatcher(_streamerId, _spikeWatcher) {
+  if (_spikeWatcher) {
+    _spikeWatcher?.addMessageToSegment(_streamerId)
+  }
+}
 
 app.ws('/ws', (ws, _req) => {
   let tiktokChatClient
@@ -341,19 +346,24 @@ app.ws('/ws', (ws, _req) => {
             kickChannelName,
           })
 
-          kickChatClient.on('kickChat', (data) => {
-            ws.send(JSON.stringify(data))
-            sendMessageToSpikeWatcher(streamerId)
-          })
-
           if (kickChatClient.connectedClients > 0) {
             kickChatClient.connectedClients++
           } else {
             kickChatClient.connectedClients++
             let didConnect = false
+            let spikeWatcher
+
+            // Activity spikes
+            spikeWatcher = new SpikeWatch(streamerId)
+            spikeWatcher.on('spike', onSpike)
 
             kickChatClient.on('connected', () => {
               didConnect = true
+            })
+
+            kickChatClient.on('kickChat', (data) => {
+              ws.send(JSON.stringify(data))
+              sendMessageToSpikeWatcher(streamerId, spikeWatcher)
             })
 
             kickChatClient.on('kickSub', async ({ data }) => {
@@ -416,6 +426,8 @@ app.ws('/ws', (ws, _req) => {
                 return
               }
 
+              spikeWatcher?.removeAllListeners()
+              spikeWatcher = null
               ws.terminate()
             })
           }
@@ -600,17 +612,19 @@ app.listen(8080, () => {
   console.log('Websocket is running on :8080/ws')
 })
 
-spikeWatcher.on('spike', async (_id, rAvg) => {
+const onSpike = async (_id, rAvg, streamerId) => {
+  let channel = process.env.HOP_CHANNEL
+  if (streamerId === '2') {
+    channel = process.env.HOP_CHANNEL_ICE
+  }
+
   // TODO: Fix this for other streamers
-  const resp = await fetch(
-    `https://api.hop.io/v1/channels/${process.env.HOP_CHANNEL}/state`,
-    {
-      method: 'GET',
-      headers: {
-        Authorization: `${HOP_TOKEN}`,
-      },
+  const resp = await fetch(`https://api.hop.io/v1/channels/${channel}/state`, {
+    method: 'GET',
+    headers: {
+      Authorization: `${HOP_TOKEN}`,
     },
-  )
+  })
 
   const json = await resp.json()
   if (json?.success) {
@@ -631,7 +645,7 @@ spikeWatcher.on('spike', async (_id, rAvg) => {
       try {
         // send webhook to Discord bot
         const resp = await fetch(
-          `${process.env.DISCORD_BOT_WEBHOOK_URL}/webhook/highlight/1149067197210185748`,
+          `${process.env.DISCORD_BOT_WEBHOOK_URL}/webhook/highlight/976623220759339058`,
           {
             method: 'POST',
             headers: {
@@ -640,7 +654,9 @@ spikeWatcher.on('spike', async (_id, rAvg) => {
             body: JSON.stringify({
               message: `Spike detected.\n**Rolling average:** ${rAvg.toFixed(
                 2,
-              )} messages in 2 minutes.\nStream time: ${uptime}`,
+              )} messages in 2 minutes.\nStream time: ${uptime}\nStreamer ID: ${
+                streamerId || 'N/A'
+              }`,
             }),
           },
         )
@@ -657,8 +673,4 @@ spikeWatcher.on('spike', async (_id, rAvg) => {
   } else {
     console.error('Failed to get uptime from Hop')
   }
-})
-
-function sendMessageToSpikeWatcher(streamerId) {
-  spikeWatcher.addMessageToSegment(streamerId)
 }
