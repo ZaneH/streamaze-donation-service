@@ -130,6 +130,7 @@ class KickChat extends EventEmitter {
     this.kickClient = null
 
     console.log('[INFO] Kick chat disconnected')
+    this.emit('close')
     return false
   }
 }

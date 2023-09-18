@@ -426,9 +426,12 @@ app.ws('/ws', (ws, _req) => {
                 return
               }
 
+              ws.terminate()
+            })
+
+            kickChatClient.on('close', () => {
               spikeWatcher?.removeAllListeners()
               spikeWatcher = null
-              ws.terminate()
             })
           }
         } catch (e) {
