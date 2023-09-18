@@ -617,9 +617,9 @@ app.listen(8080, () => {
 
 const onSpike = async (_id, rAvg, streamerId) => {
   let channel = process.env.HOP_CHANNEL
-  if (streamerId === '2') {
-    channel = process.env.HOP_CHANNEL_ICE
-  }
+  // if (streamerId === '2') {
+  //   channel = process.env.HOP_CHANNEL_ICE
+  // }
 
   // TODO: Fix this for other streamers
   const resp = await fetch(`https://api.hop.io/v1/channels/${channel}/state`, {
