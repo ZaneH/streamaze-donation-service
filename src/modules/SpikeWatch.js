@@ -11,7 +11,7 @@ class SpikeWatch extends EventEmitter {
     // Determines the threshold for a spike
     this.threshold = 0.1
     // The duration of a segment in milliseconds
-    this.segmentDuration = 5 * 60 * 1000 // X minutes
+    this.segmentDuration = 2.5 * 60 * 1000 // X minutes
     // The time at which the current segment started
     this.segmentStartTime = 0
     this.streamerId = _streamerId?.toString()
