@@ -83,7 +83,7 @@ app.ws('/ws', (ws, _req) => {
         })
 
         if (kickChatClient) {
-          kickChatClient.addChatSource({
+          await kickChatClient.addChatSource({
             channelId: payload.addChannelId,
             chatroomId: payload.addChatroomId,
           })
