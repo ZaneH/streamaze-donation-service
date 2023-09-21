@@ -1,4 +1,17 @@
-const BAD_WORDS = ['abbos', 'aboos', 'abos', 'coons']
+const BAD_WORDS = [
+  'abbos',
+  'aboos',
+  'abos',
+  'coons',
+  'nick gurs',
+  'naggers',
+  'nigers',
+  'pedo',
+  'pedophile',
+  'pedaphile',
+  'pediphile',
+  'pdf file',
+]
 
 function censorBadString(str) {
   // Create a regular expression pattern to match any of the bad words
