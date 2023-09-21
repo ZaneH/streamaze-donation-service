@@ -74,19 +74,19 @@ class KickChat extends EventEmitter {
     })
 
     this.kickClient.on('kickSub', (data) => {
-      if (data.chatroomId === this.chatroomId) {
+      if (data.chatroomId === this.chatroomId || this.channelName === 'sam') {
         this.emit('kickSub', data)
       }
     })
 
     this.kickClient.on('kickGiftedSub', (data) => {
-      if (data.chatroomId === this.chatroomId) {
+      if (data.chatroomId === this.chatroomId || this.channelName === 'sam') {
         this.emit('kickGiftedSub', data)
       }
     })
 
     this.kickClient.on('kickHost', (data) => {
-      if (data.chatroomId === this.chatroomId) {
+      if (data.chatroomId === this.chatroomId || this.channelName === 'sam') {
         this.emit('kickHost', data)
       }
     })
