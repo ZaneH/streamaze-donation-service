@@ -11,6 +11,11 @@ const BAD_WORDS = [
   'pedaphile',
   'pediphile',
   'pdf file',
+  'knick cars',
+  'nick cars',
+  'abbo',
+  'chinky chonks',
+  'chink chonk',
 ]
 
 function censorBadString(str) {
