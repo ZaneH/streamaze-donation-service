@@ -2,6 +2,7 @@ const io = require('socket.io-client')
 const fetch = require('node-fetch')
 const { EventEmitter } = require('stream')
 const { getPFPFromChannelId } = require('../utils/PFP')
+const { censorBadString } = require('./BadWords')
 
 const streamlabsDonationClients = new Map()
 
@@ -51,6 +52,9 @@ class StreamLabsDonation extends EventEmitter {
     if (!text) {
       return
     }
+
+    // Censor bad words
+    text = censorBadString(text)
 
     let senderName = message?.name
     if (senderName?.indexOf('sl_id_') === 0) {
