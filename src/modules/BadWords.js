@@ -2,6 +2,7 @@ const BAD_WORDS = [
   'abbos',
   'aboos',
   'abos',
+  'abo',
   'coons',
   'nick gurs',
   'naggers',
@@ -18,16 +19,13 @@ const BAD_WORDS = [
   'chink chonk',
 ]
 
-function censorBadString(str) {
-  // Create a regular expression pattern to match any of the bad words
-  const badWordsPattern = new RegExp(BAD_WORDS.join('|'), 'gi')
-
-  // Replace bad words with 'censored'
+function censorBadWords(str, words) {
+  const badWordsPattern = new RegExp([...words, ...BAD_WORDS].join('|'), 'gi')
   const censoredStr = str.replace(badWordsPattern, 'censored')
 
   return censoredStr
 }
 
 module.exports = {
-  censorBadString,
+  censorBadWords,
 }

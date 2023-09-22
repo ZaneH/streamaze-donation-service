@@ -108,6 +108,7 @@ app.ws('/ws', (ws, _req) => {
       let kickChatroomId // for Kick chat
       let kickChannelName // for Kick chat
       let twitchChannelName // for Twitch chat
+      let badWords // censored in TTS
 
       streamerId = payload?.streamerId
       tiktokChatUsername = payload?.tiktokChat
@@ -121,6 +122,12 @@ app.ws('/ws', (ws, _req) => {
       kickChatroomId = payload?.kickChatroomId
       kickChannelName = payload?.kickChannelName
       twitchChannelName = payload?.twitchChannelName
+      badWords = payload?.badWords
+
+      // turn csv string into array
+      if (badWords) {
+        badWords = badWords.split(',')
+      }
 
       if (streamToken && streamerId) {
         try {
@@ -142,6 +149,7 @@ app.ws('/ws', (ws, _req) => {
             streamazeKey,
             {
               ttsService,
+              badWords,
             },
           )
 

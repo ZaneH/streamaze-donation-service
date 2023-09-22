@@ -2,7 +2,7 @@ const io = require('socket.io-client')
 const fetch = require('node-fetch')
 const { EventEmitter } = require('stream')
 const { getPFPFromChannelId } = require('../utils/PFP')
-const { censorBadString } = require('./BadWords')
+const { censorBadWords } = require('./BadWords')
 
 const streamlabsDonationClients = new Map()
 
@@ -28,6 +28,7 @@ class StreamLabsDonation extends EventEmitter {
     streamazeKey = '',
     options = {
       ttsService,
+      badWords,
     },
   ) {
     super()
@@ -38,6 +39,7 @@ class StreamLabsDonation extends EventEmitter {
     this.slobsSocket = null
     this.heartbeat = null
     this.connectedClients = 0
+    this.badWords = options?.badWords || []
   }
 
   async getTTSUrl(message, voice = 'Ivy', exactMessage = false) {
@@ -54,7 +56,7 @@ class StreamLabsDonation extends EventEmitter {
     }
 
     // Censor bad words
-    text = censorBadString(text)
+    text = censorBadWords(text, this.badWords)
 
     let senderName = message?.name
     if (senderName?.indexOf('sl_id_') === 0) {
