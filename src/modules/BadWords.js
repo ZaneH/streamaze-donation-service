@@ -19,11 +19,14 @@ const BAD_WORDS = [
   'chink chonk',
 ]
 
+// Replace words in str that match words or BAD_WORDS with "censored"
+// Only replace whole words, not substrings
 function censorBadWords(str, words) {
-  const badWordsPattern = new RegExp([...words, ...BAD_WORDS].join('|'), 'gi')
-  const censoredStr = str.replace(badWordsPattern, 'censored')
-
-  return censoredStr
+  const regex = new RegExp(
+    '\\b(' + [...words, ...BAD_WORDS].join('|') + ')\\b',
+    'gi',
+  )
+  return str.replace(regex, 'censored')
 }
 
 module.exports = {
