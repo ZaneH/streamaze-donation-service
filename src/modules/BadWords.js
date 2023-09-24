@@ -21,7 +21,7 @@ const BAD_WORDS = [
 
 // Replace words in str that match words or BAD_WORDS with "censored"
 // Only replace whole words, not substrings
-function censorBadWords(str, words) {
+function censorBadWords(str, words = []) {
   const regex = new RegExp(
     '\\b(' + [...words, ...BAD_WORDS].join('|') + ')\\b',
     'gi',
