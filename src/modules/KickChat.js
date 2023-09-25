@@ -98,14 +98,18 @@ class KickChat extends EventEmitter {
 
   async addChatSource({ channelId, chatroomId }) {
     if (!this.kickClient) {
+      console.log('[ERROR] Kick client is empty')
       return
     }
 
     if (this.additionalChatSourceChannelIds.includes(channelId)) {
+      console.log('[ERROR] Chat source already added')
       return
     }
 
     this.additionalChatSourceChannelIds.push(channelId)
+    console.log('[INFO] Adding chat source', channelId, chatroomId)
+
     await this.kickClient._connect_chat({
       channelId,
       chatroomId,

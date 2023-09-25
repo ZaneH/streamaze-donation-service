@@ -87,6 +87,13 @@ app.ws('/ws', (ws, _req) => {
             channelId: payload.addChannelId,
             chatroomId: payload.addChatroomId,
           })
+        } else {
+          console.log(
+            '[ERROR] Kick chat client not found',
+            payload.kickChannelName,
+            payload.addChannelId,
+            payload.addChatroomId,
+          )
         }
 
         return
@@ -94,6 +101,7 @@ app.ws('/ws', (ws, _req) => {
 
       excludeFromProfits = payload?.excludeFromProfits
 
+      // don't allow a client to re-initialize
       if (ws.hasMessaged) return
 
       let streamerId // for assigning donations to a streamer
