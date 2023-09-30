@@ -98,6 +98,7 @@ class KickChat extends EventEmitter {
 
   async addChatSource({ channelId, chatroomId }) {
     if (!this.kickClient) {
+      kickChatClients.delete(this.channelName)
       console.log('[ERROR] Kick client is empty')
       return
     }
