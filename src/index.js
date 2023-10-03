@@ -6,6 +6,7 @@ const { getYoutubeChatClient } = require('./modules/YouTubeChat')
 const { getKickChatClient } = require('./modules/KickChat')
 const { getTwitchChatClient } = require('./modules/TwitchChat')
 const SpikeWatch = require('./modules/SpikeWatch')
+const ChatMonitor = require('./modules/ChatMonitor')
 const { updateKV } = require('./modules/Lanyard')
 const express = require('express')
 const enableWs = require('express-ws')
@@ -54,6 +55,12 @@ wsInstance.getWss().on('connection', function connection(ws) {
 function sendMessageToSpikeWatcher(_streamerId, _spikeWatcher) {
   if (_spikeWatcher) {
     _spikeWatcher?.addMessageToSegment(_streamerId)
+  }
+}
+
+function sendMessageToChatMonitor(_streamerId, _chatMonitor) {
+  if (_chatMonitor) {
+    _chatMonitor?.addMessageToSegment(_streamerId)
   }
 }
 
@@ -368,10 +375,17 @@ app.ws('/ws', (ws, _req) => {
             kickChatClient.connectedClients++
             let didConnect = false
             let spikeWatcher
+            let chatMonitor
 
             // Activity spikes
             spikeWatcher = new SpikeWatch(streamerId)
             spikeWatcher.on('spike', onSpike)
+
+            // Chat monitor
+            chatMonitor = new ChatMonitor({ service: 'kick', streamazeKey })
+            chatMonitor.on('segment', (messageCount) => {
+              onChatMonitorSegment(messageCount, streamazeKey)
+            })
 
             kickChatClient.on('connected', () => {
               didConnect = true
@@ -630,6 +644,35 @@ app.listen(8080, () => {
   console.log('Service is running on :8080')
   console.log('Websocket is running on :8080/ws')
 })
+
+const onChatMonitorSegment = async (_messageCount, _streamazeKey) => {
+  try {
+    const resp = await fetch(
+      `${process.env.STREAMAZE_STORAGE_API_URL}/api/chat-monitor`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          _messageCount,
+          _streamazeKey,
+        }),
+      },
+    )
+
+    const json = await resp.json()
+    if (json?.success) {
+      console.log('[INFO] Sent chat monitor data to Streamaze storage API')
+    } else {
+      console.error(
+        '[ERROR] Failed to send chat monitor data to Streamaze storage API',
+      )
+    }
+  } catch (e) {
+    console.error(e)
+  }
+}
 
 const onSpike = async (_id, rAvg, streamerId) => {
   let channel = process.env.HOP_CHANNEL
