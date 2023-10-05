@@ -298,7 +298,10 @@ class StreamLabsDonation extends EventEmitter {
       streamlabsDonationClients.delete(this.streamToken)
     }
 
-    this.slobsSocket.close()
+    if (this.slobsSocket) {
+      this.slobsSocket.close()
+    }
+
     clearInterval(this.heartbeat)
     this.heartbeat = null
     this.slobsSocket = null
