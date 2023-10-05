@@ -383,8 +383,9 @@ app.ws('/ws', (ws, _req) => {
 
             // Chat monitor
             chatMonitor = new ChatMonitor({ service: 'kick', streamazeKey })
-            chatMonitor.on('segment', (messageCount) => {
-              onChatMonitorSegment(messageCount, streamazeKey)
+            chatMonitor.on('segment', (cm, messageCount) => {
+              ts = cm.segmentStartTime
+              onChatMonitorSegment(streamerId, ts, messageCount, streamazeKey)
             })
 
             kickChatClient.on('connected', () => {
@@ -394,6 +395,7 @@ app.ws('/ws', (ws, _req) => {
             kickChatClient.on('kickChat', (data) => {
               ws.send(JSON.stringify(data))
               sendMessageToSpikeWatcher(streamerId, spikeWatcher)
+              sendMessageToChatMonitor(streamerId, chatMonitor)
             })
 
             kickChatClient.on('kickSub', async ({ data }) => {
@@ -462,6 +464,9 @@ app.ws('/ws', (ws, _req) => {
             kickChatClient.on('close', () => {
               spikeWatcher?.removeAllListeners()
               spikeWatcher = null
+
+              chatMonitor?.removeAllListeners()
+              chatMonitor = null
             })
           }
         } catch (e) {
@@ -645,18 +650,24 @@ app.listen(8080, () => {
   console.log('Websocket is running on :8080/ws')
 })
 
-const onChatMonitorSegment = async (_messageCount, _streamazeKey) => {
+const onChatMonitorSegment = async (
+  _streamerId,
+  _timestamp,
+  _messageCount,
+  _streamazeKey,
+) => {
   try {
     const resp = await fetch(
-      `${process.env.STREAMAZE_STORAGE_API_URL}/api/chat-monitor`,
+      `${process.env.STREAMAZE_STORAGE_API_URL}/api/chat-monitor/${_streamerId}?streamaze_key=${_streamazeKey}`,
       {
-        method: 'POST',
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          _messageCount,
-          _streamazeKey,
+          chat_activity: {
+            [_timestamp]: _messageCount,
+          },
         }),
       },
     )

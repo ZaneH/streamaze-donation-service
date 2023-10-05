@@ -19,6 +19,7 @@ class ChatMonitor extends EventEmitter {
     if (now - segmentStartTime > segmentDuration) {
       // Start new segment
       this.startNextSegment()
+      return
     }
 
     this.messageCount++
@@ -30,7 +31,7 @@ class ChatMonitor extends EventEmitter {
     const messageCount = this.messageCount
     this.messageCount = 0
 
-    this.emit('segment', messageCount)
+    this.emit('segment', this, messageCount)
   }
 }
 
