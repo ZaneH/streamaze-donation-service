@@ -673,11 +673,12 @@ const onChatMonitorSegment = async (
     )
 
     const json = await resp.json()
-    if (json?.success) {
+    if (resp?.status === 200) {
       console.log('[INFO] Sent chat monitor data to Streamaze storage API')
     } else {
       console.error(
         '[ERROR] Failed to send chat monitor data to Streamaze storage API',
+        resp?.status,
       )
     }
   } catch (e) {
