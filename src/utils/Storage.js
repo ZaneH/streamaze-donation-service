@@ -12,6 +12,13 @@ const storeDonation = async ({
   months,
   excludeFromProfits = false,
 }) => {
+  console.log('[INFO] Storing donation', {
+    streamerId,
+    type,
+    sender,
+    amount_in_usd,
+  })
+
   try {
     let amountInUSD = amount_in_usd
     if (currency.toLowerCase() !== 'usd') {
