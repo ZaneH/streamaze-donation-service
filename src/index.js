@@ -357,7 +357,9 @@ app.ws('/ws', (ws, _req) => {
             ws.terminate()
           })
         } catch (e) {
-          console.error(e)
+          console.error(
+            '[ERROR] Failed to connect to YouTube chat. Continuing...',
+          )
         }
       }
 

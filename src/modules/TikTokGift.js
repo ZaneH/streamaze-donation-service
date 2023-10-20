@@ -109,24 +109,30 @@ class TikTokGift extends EventEmitter {
   }
 
   close() {
-    if (this.connectedClients > 1) {
-      this.connectedClients--
-      return true
+    try {
+      if (this.connectedClients > 1) {
+        this.connectedClients--
+        return true
+      }
+
+      if (!this.tiktokClient) {
+        return true
+      }
+
+      if (tiktokGiftClients.has(this.username)) {
+        tiktokGiftClients.delete(this.username)
+      }
+
+      this.tiktokClient.disconnect()
+      this.tiktokClient = null
+
+      console.log('[INFO] Disconnected from TikTok gift listener')
+      return false
+    } catch (e) {
+      console.error('[ERROR] Failed to close() TikTok Gift listener')
+      console.error(e)
+      return false
     }
-
-    if (!this.tiktokClient) {
-      return true
-    }
-
-    if (tiktokGiftClients.has(this.username)) {
-      tiktokGiftClients.delete(this.username)
-    }
-
-    this.tiktokClient.disconnect()
-    this.tiktokClient = null
-
-    console.log('[INFO] Disconnected from TikTok gift listener')
-    return false
   }
 }
 
