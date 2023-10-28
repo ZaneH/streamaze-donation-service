@@ -5,6 +5,8 @@ const { getPFPFromChannelId } = require('../utils/PFP')
 const { censorBadWords } = require('./BadWords')
 
 const streamlabsDonationClients = new Map()
+const ENGLISH_CHARS =
+  'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.,!? '
 
 async function getStreamlabsDonationClient(streamToken, streamazeKey, options) {
   if (streamlabsDonationClients.has(streamToken)) {
@@ -57,6 +59,12 @@ class StreamLabsDonation extends EventEmitter {
 
     // Censor bad words
     text = censorBadWords(text, this.badWords)
+
+    // Strip non-English characters
+    text = text
+      .split('')
+      .filter((c) => ENGLISH_CHARS.indexOf(c) !== -1)
+      .join('')
 
     let senderName = message?.name
     if (senderName?.indexOf('sl_id_') === 0) {
