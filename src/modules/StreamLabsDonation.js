@@ -6,7 +6,7 @@ const { censorBadWords } = require('./BadWords')
 
 const streamlabsDonationClients = new Map()
 const ENGLISH_CHARS =
-  'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.,!? '
+  'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.,!? 0123456789+-*/=%$#@&;:_/'
 
 async function getStreamlabsDonationClient(streamToken, streamazeKey, options) {
   if (streamlabsDonationClients.has(streamToken)) {
