@@ -74,19 +74,37 @@ class KickChat extends EventEmitter {
     })
 
     this.kickClient.on('kickSub', (data) => {
-      if (data.chatroomId === this.chatroomId || this.channelName === 'sam') {
+      console.log('URGENT (for Zane) - kickSub', data)
+      console.log(this.channelName, this.chatroomId, this.channelId)
+      if (
+        data.chatroomId === this.chatroomId ||
+        this.channelName === 'sam' ||
+        this.channelName === 'hanridge'
+      ) {
         this.emit('kickSub', data)
       }
     })
 
     this.kickClient.on('kickGiftedSub', (data) => {
-      if (data.chatroomId === this.chatroomId || this.channelName === 'sam') {
+      console.log('URGENT (for Zane) - kickGiftedSub', data)
+      console.log(this.channelName, this.chatroomId, this.channelId)
+      if (
+        data.chatroomId === this.chatroomId ||
+        this.channelName === 'sam' ||
+        this.channelName === 'hanridge'
+      ) {
         this.emit('kickGiftedSub', data)
       }
     })
 
     this.kickClient.on('kickHost', (data) => {
-      if (data.chatroomId === this.chatroomId || this.channelName === 'sam') {
+      console.log('URGENT (for Zane) - kickHost', data)
+      console.log(this.channelName, this.chatroomId, this.channelId)
+      if (
+        data.chatroomId === this.chatroomId ||
+        this.channelName === 'sam' ||
+        this.channelName === 'hanridge'
+      ) {
         this.emit('kickHost', data)
       }
     })
