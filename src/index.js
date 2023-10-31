@@ -373,8 +373,10 @@ app.ws('/ws', (ws, _req) => {
 
           if (kickChatClient.connectedClients > 0) {
             kickChatClient.connectedClients++
+            kickChatClient.addWs(ws)
           } else {
             kickChatClient.connectedClients++
+            kickChatClient.addWs(ws)
             let didConnect = false
             let spikeWatcher
             let chatMonitor
@@ -395,7 +397,10 @@ app.ws('/ws', (ws, _req) => {
             })
 
             kickChatClient.on('kickChat', (data) => {
-              ws.send(JSON.stringify(data))
+              for (const ws of kickChatClient.connectedWs) {
+                ws.send(JSON.stringify(data))
+              }
+
               sendMessageToSpikeWatcher(streamerId, spikeWatcher)
               sendMessageToChatMonitor(streamerId, chatMonitor)
             })

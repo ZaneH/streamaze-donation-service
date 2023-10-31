@@ -38,6 +38,7 @@ class KickChat extends EventEmitter {
     this.channelName = options.kickChannelName
     this.kickClient = null
     this.connectedClients = 0
+    this.connectedWs = []
     this.additionalChatSourceChannelIds = []
   }
 
@@ -133,6 +134,10 @@ class KickChat extends EventEmitter {
       channelId,
       chatroomId,
     })
+  }
+
+  addWs(ws) {
+    this.connectedWs.push(ws)
   }
 
   close() {
