@@ -239,6 +239,30 @@ class KickLiveChat extends EventEmitter {
               chatroomId,
             },
           })
+        } else if (
+          jsonMsg?.event === 'App\\Events\\PinnedMessageCreatedEvent'
+        ) {
+          // V2 Pinned message
+          const { data } = jsonMsg // data is another json string
+          const jsonData = JSON.parse(data)
+
+          const { message, duration } = jsonData
+          const { id: msgId } = message
+
+          let intDuration = 20
+          try {
+            intDuration = parseInt(duration)
+          } catch (e) {
+            console.error(e)
+          }
+
+          this.emit('kickPin', {
+            type: 'kickPin',
+            data: {
+              messageId: msgId,
+              duration: intDuration,
+            },
+          })
         } else {
           console.log('[INFO] Unhandled Kick message', jsonMsg)
         }

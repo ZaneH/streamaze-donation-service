@@ -74,6 +74,10 @@ class KickChat extends EventEmitter {
       this.emit('kickChat', data)
     })
 
+    this.kickClient.on('kickPin', (data) => {
+      this.emit('kickPin', data)
+    })
+
     this.kickClient.on('kickSub', (data) => {
       console.log('URGENT (for Zane) - kickSub', data)
       console.log(this.channelName, this.chatroomId, this.channelId)
