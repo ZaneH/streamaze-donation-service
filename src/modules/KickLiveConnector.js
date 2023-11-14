@@ -263,6 +263,14 @@ class KickLiveChat extends EventEmitter {
               duration: intDuration,
             },
           })
+        } else if (
+          jsonMsg?.event === 'App\\Events\\PinnedMessageDeletedEvent'
+        ) {
+          // V2 Pinned message deleted
+          this.emit('kickPinDeleted', {
+            type: 'kickPinDeleted',
+            data: {},
+          })
         } else {
           console.log('[INFO] Unhandled Kick message', jsonMsg)
         }

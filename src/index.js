@@ -465,6 +465,12 @@ app.ws('/ws', (ws, _req) => {
               }
             })
 
+            kickChatClient.on('kickPinDeleted', (data) => {
+              for (const ws of kickChatClient.connectedWs) {
+                ws.send(JSON.stringify(data))
+              }
+            })
+
             kickChatClient.on('end', () => {
               if (!didConnect) {
                 // never connected, so don't terminate the connection
