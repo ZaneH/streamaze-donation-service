@@ -48,7 +48,8 @@ app.use(
     origin: [
       'http://localhost:3000',
       'https://streamaze.live',
-      'https://streamerdash.com/',
+      'https://streamerdash.com',
+      'https://my.streamerdash.com',
     ],
     optionsSuccessStatus: 200,
   }),
