@@ -43,17 +43,7 @@ const pingInterval = setInterval(function ping() {
   })
 }, 30000)
 
-app.use(
-  cors({
-    origin: [
-      'http://localhost:3000',
-      'https://streamaze.live',
-      'https://streamerdash.com',
-      'https://my.streamerdash.com',
-    ],
-    optionsSuccessStatus: 200,
-  }),
-)
+app.use(cors())
 
 app.use(express.json())
 
