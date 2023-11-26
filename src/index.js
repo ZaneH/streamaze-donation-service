@@ -43,7 +43,17 @@ const pingInterval = setInterval(function ping() {
   })
 }, 30000)
 
-app.use(cors())
+app.use(
+  cors({
+    origin: [
+      'http://localhost:3000',
+      'https://streamaze.live',
+      'https://streamerdash.com/',
+    ],
+    optionsSuccessStatus: 200,
+  }),
+)
+
 app.use(express.json())
 
 wsInstance.getWss().on('connection', function connection(ws) {
@@ -64,6 +74,59 @@ function sendMessageToChatMonitor(_streamerId, _chatMonitor) {
   }
 }
 
+function getConfigFromStorage(streamazeKey) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const resp = await fetch(
+        `${process.env.STREAMAZE_STORAGE_API_URL}/api/streamers?api_key=${streamazeKey}`,
+        {
+          method: 'GET',
+        },
+      )
+
+      const json = await resp.json()
+      if (resp?.status === 200) {
+        const streamerId = json?.id // for assigning donations to a streamer
+        const chatConfig = json?.chat_config
+        const donationsConfig = json?.donations_config
+        const hasValidSubscription = json?.has_valid_subscription
+
+        const tiktokChatUsername = chatConfig?.tiktok_username // for TikTok chat
+        const youtubeChatUrl = chatConfig?.youtube_channel // for YouTube chat
+        const streamToken = donationsConfig?.streamlabs_token // for StreamLabs donations
+        const ttsService = donationsConfig?.tts_service // for TTS
+        const streamlabsVoice = donationsConfig?.streamlabs_voice // for StreamLabs TTS
+        const tiktokDonoUsername = chatConfig?.tiktok_username // for TikTok gifts
+        const kickChannelId = chatConfig?.kick_channel_id // for Kick chat
+        const kickChatroomId = chatConfig?.kick_chatroom_id // for Kick chat
+        const kickChannelName = chatConfig?.kick_channel_name // for Kick chat
+        const twitchChannelName = chatConfig?.twitch_channel // for Twitch chat
+
+        const config = {
+          streamerId,
+          tiktokChatUsername,
+          youtubeChatUrl,
+          streamToken,
+          ttsService,
+          streamlabsVoice,
+          tiktokDonoUsername,
+          kickChannelId,
+          kickChatroomId,
+          kickChannelName,
+          twitchChannelName,
+          hasValidSubscription,
+        }
+
+        resolve(config)
+      } else {
+        reject(json)
+      }
+    } catch (e) {
+      reject(e)
+    }
+  })
+}
+
 app.ws('/ws', (ws, _req) => {
   let tiktokChatClient
   let youtubeChatClient
@@ -80,6 +143,7 @@ app.ws('/ws', (ws, _req) => {
       payload = JSON.parse(message)
 
       // additional chat source payload
+      // hack for adding Ice's chat to Sam's chat
       if (
         payload?.addChannelId &&
         payload?.addChatroomId &&
@@ -111,33 +175,38 @@ app.ws('/ws', (ws, _req) => {
       // don't allow a client to re-initialize
       if (ws.hasMessaged) return
 
-      let streamerId // for assigning donations to a streamer
-      let tiktokChatUsername // for TikTok chat
-      let youtubeChatUrl // for YouTube chat
-      let streamToken // for StreamLabs donations
-      let ttsService // for TTS
-      let streamazeKey // for TTS right now
-      // let streamlabsVoice // for StreamLabs TTS
-      let tiktokDonoUsername // for TikTok gifts
-      let kickChannelId // for Kick chat
-      let kickChatroomId // for Kick chat
-      let kickChannelName // for Kick chat
-      let twitchChannelName // for Twitch chat
-      let badWords // censored in TTS
+      const streamazeKey = payload?.streamazeKey // for auth & config
+      const fn = payload?.function // for determining what to use
+      const isDonationLog = fn === 'donations'
+      const isChatLog = fn === 'chat'
+      const config = await getConfigFromStorage(streamazeKey)
 
-      streamerId = payload?.streamerId
-      tiktokChatUsername = payload?.tiktokChat
-      youtubeChatUrl = payload?.youtubeChat
-      streamToken = payload?.streamToken
-      ttsService = payload?.ttsService
-      streamazeKey = payload?.streamazeKey
-      // streamlabsVoice = payload?.streamlabsVoice
-      tiktokDonoUsername = payload?.tiktokDonos
-      kickChannelId = payload?.kickChannelId
-      kickChatroomId = payload?.kickChatroomId
-      kickChannelName = payload?.kickChannelName
-      twitchChannelName = payload?.twitchChannelName
-      badWords = payload?.badWords
+      if (config?.hasValidSubscription !== true) {
+        ws.send(
+          JSON.stringify({
+            error: 'invalid_subscription',
+          }),
+        )
+
+        ws.close(1011, 'Invalid subscription')
+        return
+      }
+
+      const streamerId = config?.streamerId
+      const tiktokChatUsername = isChatLog && config?.tiktokChat
+      const youtubeChatUrl = isChatLog && config?.youtubeChat
+      const kickChannelId = isChatLog && config?.kickChannelId
+      const kickChatroomId = isChatLog && config?.kickChatroomId
+      const kickChannelName = isChatLog && config?.kickChannelName
+      const twitchChannelName = isChatLog && config?.twitchChannelName
+
+      const ttsService = isDonationLog && config?.ttsService
+      // const streamlabsVoice = isDonationLog && config?.streamlabsVoice
+      const streamToken = isDonationLog && config?.streamToken
+      const tiktokDonoUsername = isDonationLog && config?.tiktokDonos
+
+      // TODO: Store bad words in DB
+      const badWords = isDonationLog && payload?.badWords
 
       // turn csv string into array
       if (badWords) {
@@ -691,7 +760,6 @@ const onChatMonitorSegment = async (
       },
     )
 
-    const json = await resp.json()
     if (resp?.status === 200) {
       console.log('[INFO] Sent chat monitor data to Streamaze storage API')
     } else {
