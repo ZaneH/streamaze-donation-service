@@ -47,6 +47,7 @@ app.use(
   cors({
     origin: [
       'http://localhost:3000',
+      'http://localhost:4000',
       'https://streamerdash.com',
       'https://my.streamerdash.com',
     ],
