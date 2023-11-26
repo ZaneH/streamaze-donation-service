@@ -1,3 +1,7 @@
+/**
+ * Copyright 2023, Zane Helton, All rights reserved.
+ */
+
 const crypto = require('crypto')
 const { getStreamlabsDonationClient } = require('./modules/StreamLabsDonation')
 const { getTiktokGiftClient } = require('./modules/TikTokGift')

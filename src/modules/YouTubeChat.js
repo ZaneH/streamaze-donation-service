@@ -1,3 +1,7 @@
+/**
+ * Copyright 2023, Zane Helton, All rights reserved.
+ */
+
 const { EventEmitter } = require('stream')
 const { LiveChat } = require('youtube-chat')
 

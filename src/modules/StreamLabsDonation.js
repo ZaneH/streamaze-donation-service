@@ -1,3 +1,7 @@
+/**
+ * Copyright 2023, Zane Helton, All rights reserved.
+ */
+
 const io = require('socket.io-client')
 const fetch = require('node-fetch')
 const { EventEmitter } = require('stream')

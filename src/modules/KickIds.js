@@ -1,3 +1,7 @@
+/**
+ * Copyright 2023, Zane Helton, All rights reserved.
+ */
+
 // Kick chat + donations require a channel ID and
 // a chatroom ID. Getting them is not easy, so
 // this module will get them from just a username.

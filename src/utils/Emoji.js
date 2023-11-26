@@ -1,3 +1,7 @@
+/**
+ * Copyright 2023, Zane Helton, All rights reserved.
+ */
+
 const mapKickEmoji = (messageText) => {
   // parse emojis they look like [emote:id_num:name]
   const emojiRegex = /\[emote:(\d+):([^\]]*)*\]/g

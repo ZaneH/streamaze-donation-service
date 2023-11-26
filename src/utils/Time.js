@@ -1,3 +1,7 @@
+/**
+ * Copyright 2023, Zane Helton, All rights reserved.
+ */
+
 function secondsToHHMMSS(secs) {
   var sec_num = parseInt(secs, 10)
   if (sec_num <= 0) {

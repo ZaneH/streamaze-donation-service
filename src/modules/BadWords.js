@@ -1,3 +1,7 @@
+/**
+ * Copyright 2023, Zane Helton, All rights reserved.
+ */
+
 const BAD_WORDS = [
   'abbos',
   'aboos',
