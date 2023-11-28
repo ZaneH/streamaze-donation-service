@@ -10,6 +10,11 @@ added to an existing client, `.connectedClients` increases by 1. When a connecti
 is removed, `.connectedClients` decreases by 1. When `.connectedClients` reaches 0,
 the client should be shutdown and all event listeners removed.
 
+## Depends On
+
+- [ZaneH/streamaze-api](https://github.com/ZaneH/streamaze-api)
+- [ZaneH/exchange-rate-api](https://github.com/ZaneH/exchange-rate-api)
+
 ## Setup
 
 ```
@@ -22,14 +27,16 @@ $ npm run dev
 ## Environment Variables
 
 ```
-NODE_ENV=development
-SAM_SOCKET_TOKEN_ALIAS=<random letters>
-SAM_SOCKET_TOKEN=<sam's streamlabs socket token>
-TIKTOK_API_KEY=<not required>
-YOUTUBE_API_KEY=<youtube api key>
-OBS_API_URL=<livebond url>
-LANYARD_API_URL=https://api.lanyard.rest
-STREAMAZE_1_API_URL=http://localhost:8001 # likely not needed
-STREAMAZE_STORAGE_API_URL=http://localhost:4000 # Phoenix app url
-EXCHANGE_RATE_API=https://exrate-api.streamaze.live
+export NODE_ENV=development
+
+# set these to random values, they're not necessary
+export SAM_SOCKET_TOKEN=<sam's streamlabs socket token>
+export SAM_SOCKET_TOKEN_ALIAS=<random letters>
+
+export TIKTOK_API_KEY=<not required>
+export YOUTUBE_API_KEY=<youtube api key>
+export OBS_API_URL=<livebond url>
+export LANYARD_API_URL=https://api.lanyard.rest
+export STREAMAZE_STORAGE_API_URL=http://localhost:4000 # Phoenix app url
+export EXCHANGE_RATE_API=https://exrate-api.streamaze.live
 ```
