@@ -209,6 +209,7 @@ app.ws('/ws', (ws, _req) => {
       const twitchChannelName = isChatLog && config?.twitchChannelName
 
       const ttsService = isDonationLog && config?.ttsService
+      // TODO: This might not be needed anymore... I think it's handled by the TTS endpoint
       // const streamlabsVoice = isDonationLog && config?.streamlabsVoice
       const streamToken = isDonationLog && config?.streamToken
       const tiktokDonoUsername = isDonationLog && config?.tiktokDonos

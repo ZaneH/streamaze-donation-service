@@ -10,9 +10,16 @@ added to an existing client, `.connectedClients` increases by 1. When a connecti
 is removed, `.connectedClients` decreases by 1. When `.connectedClients` reaches 0,
 the client should be shutdown and all event listeners removed.
 
-## Quick Start
+## Setup
 
-### Environment Variables
+```
+$ git clone https://github.com/ZaneH/streamaze-donation-service.git
+$ cd streamaze-donation-service
+$ npm install
+$ npm run dev
+```
+
+## Environment Variables
 
 ```
 NODE_ENV=development
@@ -25,11 +32,4 @@ LANYARD_API_URL=https://api.lanyard.rest
 STREAMAZE_1_API_URL=http://localhost:8001 # likely not needed
 STREAMAZE_STORAGE_API_URL=http://localhost:4000 # Phoenix app url
 EXCHANGE_RATE_API=https://exrate-api.streamaze.live
-```
-
-### Run
-
-```
-npm install
-npm run dev
 ```
