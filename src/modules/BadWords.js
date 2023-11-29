@@ -2,26 +2,7 @@
  * Copyright 2023, Zane Helton, All rights reserved.
  */
 
-const BAD_WORDS = [
-  'abbos',
-  'aboos',
-  'abos',
-  'abo',
-  'coons',
-  'nick gurs',
-  'naggers',
-  'nigers',
-  'pedo',
-  'pedophile',
-  'pedaphile',
-  'pediphile',
-  'pdf file',
-  'knick cars',
-  'nick cars',
-  'abbo',
-  'chinky chonks',
-  'chink chonk',
-]
+const BAD_WORDS = [] // populate the defaults yourself lol
 
 // Replace words in str that match words or BAD_WORDS with "censored"
 // Only replace whole words, not substrings
