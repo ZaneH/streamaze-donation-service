@@ -38,5 +38,7 @@ export YOUTUBE_API_KEY=<youtube api key>
 export OBS_API_URL=<livebond url>
 export LANYARD_API_URL=https://api.lanyard.rest
 export STREAMAZE_STORAGE_API_URL=http://localhost:4000 # Phoenix app url
-export EXCHANGE_RATE_API=https://exrate-api.streamaze.live
+
+# https://github.com/ZaneH/exchange-rate-api
+export EXCHANGE_RATE_API=
 ```
