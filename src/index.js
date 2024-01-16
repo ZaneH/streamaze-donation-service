@@ -2,7 +2,6 @@
  * Copyright 2023, Zane Helton, All rights reserved.
  */
 
-const crypto = require('crypto')
 const { getStreamlabsDonationClient } = require('./modules/StreamLabsDonation')
 const { getTiktokGiftClient } = require('./modules/TikTokGift')
 const { getTiktokChatClient } = require('./modules/TikTokChat')
@@ -27,7 +26,10 @@ const wsInstance = enableWs(app)
 require('dotenv').config()
 
 const HOP_TOKEN = process.env.HOP_TOKEN
-const hop = new Hop(HOP_TOKEN)
+let hop
+if (HOP_TOKEN) {
+  hop = new Hop(HOP_TOKEN)
+}
 
 function heartbeat() {
   this.isAlive = true
@@ -47,20 +49,7 @@ const pingInterval = setInterval(function ping() {
   })
 }, 30000)
 
-app.use(
-  cors({
-    origin: [
-      'http://localhost:3000',
-      'http://localhost:4000',
-
-      'https://streamerdash.com',
-      'https://my.streamerdash.com',
-      'https://streamaze.xyz',
-      'https://my.streamaze.xyz',
-    ],
-    optionsSuccessStatus: 200,
-  }),
-)
+app.use(cors())
 
 app.use(express.json())
 
@@ -224,19 +213,6 @@ app.ws('/ws', (ws, _req) => {
 
       if (streamToken && streamerId) {
         try {
-          // Alias for Sam's key
-          const samAlias = process.env.SAM_SOCKET_TOKEN_ALIAS
-          if (samAlias.length === streamToken.length) {
-            if (
-              crypto.timingSafeEqual(
-                Buffer.from(samAlias),
-                Buffer.from(streamToken),
-              )
-            ) {
-              streamToken = process.env.SAM_SOCKET_TOKEN
-            }
-          }
-
           slobsDonationClient = await getStreamlabsDonationClient(
             streamToken,
             streamazeKey,

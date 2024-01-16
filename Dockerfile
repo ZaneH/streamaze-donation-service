@@ -14,6 +14,9 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
 WORKDIR /app
 COPY package.json package-lock.json ./
+
+RUN apk add --update python3 make g++\
+   && rm -rf /var/cache/apk/*
 RUN npm ci
 
 COPY . .
